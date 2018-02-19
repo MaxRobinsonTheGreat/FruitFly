@@ -2,41 +2,47 @@ var ctx;
 var interval;
 
 var FPS = 60;
-var box = {x:20, y:20, lw:20, spd:2};
+var box_spd = core.getBoxSpeed();
+var box = lw:core.getDefaultBox();
 var others = [];
 
 var key = {left:false, right:false, up:false, down:false}
 
+var last_update = 0;
+var delta_time = 0;
 
-
-var socket = io.connect('http://10.24.222.132:4200/');
+var socket = io.connect('http://10.37.145.23:4200/');
 socket.on('connect', function(data) {
    socket.emit('join', 'Hello World from client');
    main();
 });
 
 function main(){
-  document.addEventListener('keydown', handleKeyDown); //these are key control set up code.
+  document.addEventListener('keydown', handleKeyDown);
 	document.addEventListener('keyup', handleKeyUp);
 
   ctx = document.getElementById('canvas').getContext("2d");
 
+  last_update = Date.now();
   curInterval = setInterval(function(){Update();Draw(ctx);}, 1000/FPS)
 
   socket.emit('init_client', box);
 }
 
 function Update(){
-  if(key.left) box.x-=box.spd;
-  if(key.right) box.x+=box.spd;
-  if(key.up) box.y-=box.spd;
-  if(key.down) box.y+=box.spd;
+  delta_time = Date.now() - last_update;
+  last_update = Date.now();
 
-  socket.emit('update', box);
+  box = core.moveBox(box, key, delta_time);
+
+  var pack = {moves: key, timestamp:Date.now()}
+  console.log(pack);
+  socket.emit('update', pack);
 }
 socket.on('all', function(data) {
     others = data;
 });
+
 
 function Draw(){
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -73,16 +79,3 @@ function handleKeyUp(evt){
   if ( evt.keyCode == KEY_DOWN )
     key.down = false;
 }
-
-
-
-// socket.on('broad', function(data) {
-//         $('#future').append(data+ "<br/>");
-//   });
-//
-// $('form').submit(function(e){
-//     e.preventDefault();
-//     var message = $('#chat_input').val();
-//     socket.emit('messages', message);
- //  $('chat_input').val("");
-// });
