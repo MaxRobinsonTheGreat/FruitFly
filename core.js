@@ -5,7 +5,7 @@
     var default_box = {x:20, y:20, lw:20}; //intitial box pos/size
 
     exports.getBoxSpeed = function(){return box_spd;};
-    exports.getDefaultBox = function(){return default_box;};
+    exports.getDefaultBox = function(){return {x: 20, y:20, lw:20};};
 
     exports.moveBox = function(box, key, time){
       dist = (time/1000)*box_spd;
@@ -19,5 +19,7 @@
     exports.connection = function(){
         return "core module connected";
     };
+
+
 
 })(typeof exports === 'undefined'? this['core']={}: exports);

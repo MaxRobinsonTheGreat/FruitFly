@@ -10,6 +10,7 @@ var io = require('socket.io')(server);
 
 var clients = new Map();
 var client_counter=0;
+var queue = [];
 
 app.use(express.static(__dirname + '/node_modules'));
 app.get('/', function(req, res,next) {
@@ -30,11 +31,8 @@ server.listen(4200, '0.0.0.0');
 console.log("SERVER: listening...");
 io.on('connection', function(client) {
   var key=(client_counter++)+"";
-  clients.set(key, {
-    /*c: client,
-    box.{x:0, y:0, lw:0, spd:0}});*/
 
-  var box = game_core.getDefaultBox();
+  // var box = game_core.getDefaultBox();
 
   console.log('Client ' + key + ' connected...');
 
@@ -42,17 +40,29 @@ io.on('connection', function(client) {
   });
 
   client.on('init_client', function(data){
-    clients.set(key, data);
+    console.log(data);
+
+    clients.set(key, {
+      box: data,
+      moves: {left:false, right:false, up:false, down:false}
+    });
   });
 
   client.on('update', function(data){
 
-    var new_box = game_core.moveBox(data.moves());
+    // console.log(clients.get(key));
+
+    queue.push({key: key, moves: data.moves});
+
+    clients.get(key).moves = data.moves;
+    // clients.set(key, {
+    //   box:
+    // })
 
 
-    //clients.set(key, data);
+    // console.log(Array.from(clients.values()));
 
-    //client.broadcast.emit('all', Array.from(clients.values()));
+    client.broadcast.emit('all', Array.from(clients.values()));
   });
 
   client.on('disconnect', function(data){
@@ -83,12 +93,28 @@ function UpdateState(){
   delta_time = Date.now() - last_update;
   last_update = Date.now();
 
+  clients.forEach(function update(value, key, map){
+    // console.log(value.box);
+    // console.log("here!");
+    value.box = game_core.moveBox(value.box, value.moves, delta_time);
+  });
+
   if(Date.now() - last_client_update >= client_update_waitTime){
     update_clients();
     last_client_update = Date.now();
   }
 }
 
+// function processQueue(time){
+//   for(var i=(queue.length-1); i >= 0; i--){
+//     var input = queue.shift();
+//     console.log(input.key);
+//     clients.set(input.key, {
+//        box: game_core.moveBox(clients.get(input.key).box, input.moves, time)
+//      });
+//      // console.log(clients.get(input.key));
+//   }
+// }
 
   //  -- SEND TO CLIENTS --
 function update_clients(){
