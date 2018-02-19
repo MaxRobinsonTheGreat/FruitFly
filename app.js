@@ -11,10 +11,12 @@ app.use(express.static(__dirname + '/node_modules'));
 app.get('/', function(req, res,next) {
     res.sendFile(__dirname + '/index.html');
 });
-app.get('/game.js', function(req, res,next) {
+app.get('/game.js', function(req, res, next) {
     res.sendFile(__dirname + '/game.js');
 });
-
+app.get('/css/master.css', function(req, res, next) {
+    res.sendFile(__dirname + '/css/master.css');
+})
 
 
 

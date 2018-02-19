@@ -9,7 +9,7 @@ var key = {left:false, right:false, up:false, down:false}
 
 
 
-var socket = io.connect('http://10.37.97.112:4200/');
+var socket = io.connect('http://10.24.222.132:4200/');
 socket.on('connect', function(data) {
    socket.emit('join', 'Hello World from client');
    main();
@@ -24,7 +24,6 @@ function main(){
   curInterval = setInterval(function(){Update();Draw(ctx);}, 1000/FPS)
 
   socket.emit('init_client', box);
-
 }
 
 function Update(){
