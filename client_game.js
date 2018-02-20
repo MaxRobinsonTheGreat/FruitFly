@@ -11,7 +11,7 @@ var key = {left:false, right:false, up:false, down:false}
 var last_update = 0;
 var delta_time = 0;
 
-var socket = io.connect('http://10.24.16.60:4200/');
+var socket = io.connect('http://10.24.64.67:4200/');
 socket.on('connect', function(data) {
    socket.emit('join', 'Hello World from client');
    main();
