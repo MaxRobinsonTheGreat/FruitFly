@@ -9,8 +9,11 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
 var clients = new Map();
+var clientbodies = new Map();
 var client_counter=0;
-var queue = [];
+
+const margin_of_error = 1.5; //the client box prediction can be within .5 of the server prediction
+
 
 app.use(express.static(__dirname + '/node_modules'));
 app.get('/', function(req, res,next) {
@@ -46,23 +49,26 @@ io.on('connection', function(client) {
       box: data,
       moves: {left:false, right:false, up:false, down:false}
     });
+    clientbodies.set(key, client);
   });
 
-  client.on('update', function(data){
-
-    // console.log(clients.get(key));
-
-    queue.push({key: key, moves: data.moves});
-
+  client.on('move', function(data){
     clients.get(key).moves = data.moves;
-    // clients.set(key, {
-    //   box:
-    // })
-
-
-    // console.log(Array.from(clients.values()));
-
-    client.broadcast.emit('all', Array.from(clients.values()));
+  });
+  client.on('stop', function(data){
+    clients.get(key).moves = data.moves;
+    var server_box = clients.get(key).box;
+    var predicted_box = data.box;
+    var xDif = Math.abs(server_box.x - predicted_box.x);
+    var yDif = Math.abs(server_box.y - predicted_box.y);
+    if(xDif > margin_of_error || yDif > margin_of_error){
+        client.emit('correction', server_box);
+        console.log("correction");
+    }
+    else{
+      server_box = predicted_box;
+      console.log("acceptable difference");
+    }
   });
 
   client.on('disconnect', function(data){
@@ -77,7 +83,7 @@ io.on('connection', function(client) {
   // -- PHYSICS LOOP --
 init_physicsLoop();
 var physics_loop;
-var update_p_sec = 66;
+var update_per_sec = 66;
 var client_update_waitTime = 45; //ms
 var should_update = false;
 
@@ -86,7 +92,7 @@ var last_client_update = Date.now();
 var delta_time;
 
 function init_physicsLoop(){
-  physics_loop = setInterval(function(){UpdateState();}, 1000/update_p_sec);
+  physics_loop = setInterval(function(){UpdateState();}, 1000/update_per_sec);
   console.log("SERVER: physics loop initialized");
 }
 function UpdateState(){
@@ -96,7 +102,20 @@ function UpdateState(){
   clients.forEach(function update(value, key, map){
     // console.log(value.box);
     // console.log("here!");
+
+    //600 by 400
+
     value.box = game_core.moveBox(value.box, value.moves, delta_time);
+    var send_correction = false;
+    // if(value.box.x + value.box.lw > 600) {value.box.x = 600-value.box.lw;send_correction = true}
+    // if(value.box.y + value.box.lw > 400) {value.box.y = 400-value.box.lw;send_correction = true}
+    // if(value.box.x < 0) {value.box.x = 0;send_correction = true}
+    // if(value.box.y < 0) {value.box.y = 0;send_correction = true}
+
+    var boundry_result = game_core.checkBoundry(value.box);
+    value.box = boundry_result.box;
+    if(boundry_result.was_correction) clientbodies.get(key).emit('boundry', value.box);
+
   });
 
   if(Date.now() - last_client_update >= client_update_waitTime){
@@ -119,5 +138,8 @@ function UpdateState(){
   //  -- SEND TO CLIENTS --
 function update_clients(){
   // update all clients with the info relevant to them about the world and the other clients
+  clientbodies.forEach(function update(value, key, map){
+    value.broadcast.emit('all', Array.from(clients.values()));
+  });
   should_update = true;
 }

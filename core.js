@@ -16,6 +16,15 @@
       return(box);
     }
 
+    exports.checkBoundry = function(box){
+      var was_correction = false;
+      if(box.x + box.lw > 600) {box.x = 600-box.lw;was_correction = true}
+      if(box.y + box.lw > 400) {box.y = 400-box.lw;was_correction = true}
+      if(box.x < 0) {box.x = 0;was_correction = true}
+      if(box.y < 0) {box.y = 0;was_correction = true}
+      return {box, was_correction};
+    }
+
     exports.connection = function(){
         return "core module connected";
     };
