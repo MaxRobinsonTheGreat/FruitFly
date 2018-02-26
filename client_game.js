@@ -11,17 +11,21 @@ var key = {left:false, right:false, up:false, down:false}
 var last_update = 0;
 var delta_time = 0;
 
-var socket = io.connect('http://10.24.64.67:4200/');
+var socket = io.connect('http://192.168.16.87:4200/');
 socket.on('connect', function(data) {
    socket.emit('join', 'Hello World from client');
    main();
 });
 
-function main(){
-  document.addEventListener('keydown', handleKeyDown);
-	document.addEventListener('keyup', handleKeyUp);
+function intializeCanvasControls() {
+  document.addEventListener('keydown', checkKeyDown);
+	document.addEventListener('keyup', checkKeyUp);
 
   ctx = document.getElementById('canvas').getContext("2d");
+}
+
+function main(){
+  intializeCanvasControls();
 
   last_update = Date.now();
   curInterval = setInterval(function(){Update();Draw(ctx);}, 1000/FPS)
@@ -29,10 +33,12 @@ function main(){
   socket.emit('init_client', box);
 }
 
-function Update(){
+function updateDeltaTime() {
   delta_time = Date.now() - last_update;
   last_update = Date.now();
+}
 
+function updateBoxPositions() {
   box = core.moveBox(box, key, delta_time);
   var boundry_result = core.checkBoundry(box);
   box = boundry_result.box;
@@ -40,9 +46,22 @@ function Update(){
     console.log(boundry_result.box);
     prediction_queue.push(boundry_result.box);
   }
+}
 
-  var pack = {moves: key, timestamp:Date.now()};
-  socket.emit('move', pack);
+//This looks really similar to sendStopToClients. Can we combine them?
+// function sendMoveToClients() {
+//   var pack = {moves: key, timestamp:Date.now()};
+//   socket.emit('move', pack);
+// }
+
+
+//Does Update and the three socket functions represent a bigger idea?
+function Update(){
+  updateDeltaTime();
+
+  updateBoxPositions();
+
+  emitToServer('move');
 }
 socket.on('all', function(data) {
     others = data;
@@ -74,30 +93,35 @@ function Draw(){
 
 
 var KEY_UP=38, KEY_DOWN=40, KEY_LEFT=37, KEY_RIGHT=39;
-function handleKeyDown(evt) {
+function checkKeyDown(evt) {
   evt.preventDefault();
-  if ( evt.keyCode == KEY_LEFT )
+  if (evt.keyCode == KEY_UP)
     key.left = true;
-  if ( evt.keyCode == KEY_RIGHT )
+  if (evt.keyCode == KEY_RIGHT)
     key.right = true;
-  if ( evt.keyCode == KEY_UP )
+  if (evt.keyCode == KEY_UP)
     key.up = true;
-  if ( evt.keyCode == KEY_DOWN )
+  if (evt.keyCode == KEY_DOWN)
     key.down = true;
-
-
 }
-function handleKeyUp(evt){
+
+//Looks really similar to sendMoveToClients. Can we combine them?
+//Used to be sendStopToClients (remove comment)
+function emitToServer(emitName) {
+  var pack = {box: box, moves: key, timestamp:Date.now()};
+  socket.emit(emitName, pack);
+}
+
+function checkKeyUp(evt){
   evt.preventDefault();
-  if ( evt.keyCode == KEY_LEFT )
+  if (evt.keyCode == KEY_LEFT)
     key.left = false;
-  if ( evt.keyCode == KEY_RIGHT )
+  if (evt.keyCode == KEY_RIGHT)
     key.right = false;
-  if ( evt.keyCode == KEY_UP )
+  if (evt.keyCode == KEY_UP)
     key.up = false;
-  if ( evt.keyCode == KEY_DOWN )
+  if (evt.keyCode == KEY_DOWN)
     key.down = false;
 
-  var pack = {box: box, moves: key, timestamp:Date.now()};
-  socket.emit('stop', pack);
+  emitToServer('stop');
 }
