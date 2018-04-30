@@ -43,7 +43,7 @@ io.on('connection', function(client) {
   });
 
   client.on('init_client', function(data){
-    console.log(data);
+    // console.log(data);
 
     clients.set(key, {
       box: data,
@@ -63,11 +63,11 @@ io.on('connection', function(client) {
     var yDif = Math.abs(server_box.y - predicted_box.y);
     if(xDif > margin_of_error || yDif > margin_of_error){
         client.emit('correction', server_box);
-        console.log("correction");
+        // console.log("correction");
     }
     else{
       server_box = predicted_box;
-      console.log("acceptable difference");
+      // console.log("acceptable difference");
     }
   });
 

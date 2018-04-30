@@ -13,7 +13,7 @@ var delta_time = 0;
 
 var prediction_queue = [];
 
-var socket = io.connect('http://10.24.68.56:4200/');
+var socket = io.connect('http://10.24.204.3:4200/');
 socket.on('connect', function(data) {
    socket.emit('join', 'Hello World from client');
    main();
