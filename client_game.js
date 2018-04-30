@@ -11,10 +11,9 @@ var key = {left:false, right:false, up:false, down:false}
 var last_update = 0;
 var delta_time = 0;
 
-<<<<<<< HEAD
-var prediction_queue = [];
 
 var socket = io.connect('http://10.24.204.3:4200/');
+
 socket.on('connect', function(data) {
    socket.emit('join', 'Hello World from client');
    main();
@@ -45,20 +44,9 @@ function updateBoxPositions() {
   box = core.moveBox(box, key, delta_time);
   var boundry_result = core.checkBoundry(box);
   box = boundry_result.box;
-  if(boundry_result.was_correction){
-    console.log(boundry_result.box);
-    prediction_queue.push(boundry_result.box);
-  }
 }
 
-//This looks really similar to sendStopToClients. Can we combine them?
-// function sendMoveToClients() {
-//   var pack = {moves: key, timestamp:Date.now()};
-//   socket.emit('move', pack);
-// }
 
-
-//Does Update and the three socket functions represent a bigger idea?
 function Update(){
   updateDeltaTime();
 
@@ -68,18 +56,10 @@ function Update(){
 }
 socket.on('all', function(data) {
     others = data;
-    // console.log(data);
 });
 socket.on('correction', function(new_box){
   box = new_box;
   console.log("correction");
-});
-socket.on('boundry', function(new_box){
-  // var prediction = prediction_queue.shift();
-  // //console.log(new_box +", "+ prediction);
-  // if(prediction !== new_box){
-  //   box = new_box;
-  // }
 });
 
 
@@ -98,7 +78,7 @@ function Draw(){
 var KEY_UP=38, KEY_DOWN=40, KEY_LEFT=37, KEY_RIGHT=39;
 function checkKeyDown(evt) {
   evt.preventDefault();
-  if (evt.keyCode == KEY_UP)
+  if (evt.keyCode == KEY_LEFT)
     key.left = true;
   if (evt.keyCode == KEY_RIGHT)
     key.right = true;
@@ -108,8 +88,6 @@ function checkKeyDown(evt) {
     key.down = true;
 }
 
-//Looks really similar to sendMoveToClients. Can we combine them?
-//Used to be sendStopToClients (remove comment)
 function emitToServer(emitName) {
   var pack = {box: box, moves: key, timestamp:Date.now()};
   socket.emit(emitName, pack);
