@@ -4,15 +4,16 @@ var interval;
 var FPS = 60;
 var box_spd = core.getBoxSpeed();
 var box = core.getDefaultBox();
-var others = [];
+var others = new Map();
 
 var key = {left:false, right:false, up:false, down:false}
+var self_key = "";
 
 var last_update = 0;
 var delta_time = 0;
 
 
-var socket = io.connect('http://10.24.204.3:4200/');
+var socket = io.connect('http://192.168.1.254:4200/');
 
 socket.on('connect', function(data) {
    socket.emit('join', 'Hello World from client');
@@ -42,8 +43,15 @@ function updateDeltaTime() {
 
 function updateBoxPositions() {
   box = core.moveBox(box, key, delta_time);
+
   var boundry_result = core.checkBoundry(box);
   box = boundry_result.box;
+
+  others.forEach(function update(value, key, map){
+    // if(core.collision(box, value.box)){
+    //   console.log("Collision!");
+    // }
+  });
 }
 
 
@@ -55,11 +63,11 @@ function Update(){
   emitToServer('move');
 }
 socket.on('all', function(data) {
-    others = data;
+    others = data.clients;
+    self_key = data.self_key;
 });
 socket.on('correction', function(new_box){
   box = new_box;
-  console.log("correction");
 });
 
 
@@ -68,10 +76,11 @@ function Draw(){
   ctx.fillStyle = "blue";
 	ctx.fillRect(box.x, box.y, box.lw, box.lw);
   ctx.fillStyle = "red";
-  for(var i=0; i < others.length; i++){
-    ctx.fillRect(others[i].box.x, others[i].box.y,
-      others[i].box.lw, others[i].box.lw);
-  }
+  others.forEach(function update(value, key, map){
+    console.log(value.box);
+    ctx.fillRect(value.box.x, value.box.y,
+      value.box.lw, value.box.lw);
+  });
 }
 
 

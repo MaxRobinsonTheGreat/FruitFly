@@ -113,7 +113,8 @@ function UpdateState(){
 function update_clients(){
   // update all clients with the info relevant to them about the world and the other clients
   clientbodies.forEach(function update(value, key, map){
-    value.broadcast.emit('all', Array.from(clients.values()));
+
+    value.broadcast.emit('all', {clients: clients, self_key: key});
   });
   should_update = true;
 }
