@@ -26,8 +26,8 @@
     }
 
     exports.collision = function(b1, b2){
-      // return (b1.x+b1.lw > b2.x && b1.x < b2.x+b2.lw )&&
-              // b1.y+b1.lw > b2.y && b1.y < b2.y+b2.lw)
+      return (b1.x+b1.lw > b2.x && b1.x < b2.x+b2.lw &&
+              b1.y+b1.lw > b2.y && b1.y < b2.y+b2.lw)
     }
 
     exports.connection = function(){

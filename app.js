@@ -67,6 +67,7 @@ io.on('connection', function(client) {
 
   client.on('disconnect', function(data){
     clients.delete(key);
+    clientbodies.delete(key);
     console.log("Client " + key + " disconnected.");
   });
 });
@@ -113,8 +114,8 @@ function UpdateState(){
 function update_clients(){
   // update all clients with the info relevant to them about the world and the other clients
   clientbodies.forEach(function update(value, key, map){
-
-    value.broadcast.emit('all', {clients: clients, self_key: key});
+    self_index = Array.from(clients.keys()).indexOf(key);
+    value.emit('all', {clients: Array.from(clients.values()), self_index: self_index});
   });
   should_update = true;
 }
