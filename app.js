@@ -1,8 +1,8 @@
 // app.js
 const game_core = require("./core");
 
-console.log("SERVER: " + game_core.connection());
 
+console.log("SERVER: " + game_core.connection());
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
@@ -16,18 +16,25 @@ const margin_of_error = 1.5; //the client box prediction can be within 1.5 of th
 
 
 app.use(express.static(__dirname + '/node_modules'));
-app.get('/', function(req, res,next) {
-    res.sendFile(__dirname + '/index.html');
+app.get('/', function(req, res, next) {
+    res.sendFile(__dirname + '/html/index.html');
 });
-app.get('/client_game.js', function(req, res,next) {
+app.post('/user', function(req, res, next) {
+    console.log(req.body); //this is still undefined
+    res.sendFile(__dirname + '/html/index.html');
+})
+app.get('/client_game.js', function(req, res, next) {
     res.sendFile(__dirname + '/client_game.js');
 });
-app.get('/core.js', function(req, res,next) {
+app.get('/core.js', function(req, res, next) {
     res.sendFile(__dirname + '/core.js');
 });
 app.get('/css/master.css', function(req, res, next) {
     res.sendFile(__dirname + '/css/master.css');
-})
+});
+app.get('/html/login-page.html', function(req, res, next) {
+    res.sendFile(__dirname + '/html/login-page.html')
+});
 
 // -- ClIENT LISTENERS --
 server.listen(4200, '0.0.0.0');
