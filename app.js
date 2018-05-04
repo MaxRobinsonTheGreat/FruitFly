@@ -56,6 +56,10 @@ io.on('connection', function(client) {
       moves: {left:false, right:false, up:false, down:false}
     });
     clientbodies.set(key, client);
+
+    if(clients.size === 1){
+      init_physicsLoop();
+    }
   });
 
   client.on('move', function(data){
@@ -81,6 +85,11 @@ io.on('connection', function(client) {
     clients.delete(key);
     clientbodies.delete(key);
     console.log("Client " + key + " disconnected.");
+
+    if(clients.size === 0){
+        clearInterval(physics_loop);
+        console.log("SERVER: No remaining clients. Physics loop shut down.");
+    }
   });
 });
 
@@ -89,7 +98,6 @@ io.on('connection', function(client) {
 
 
   // -- PHYSICS LOOP --
-init_physicsLoop();
 var physics_loop;
 var update_per_sec = 66;
 var client_update_waitTime = 45; //millis
