@@ -22,7 +22,7 @@ app.get('/', function(req, res, next) {
 app.post('/user', function(req, res, next) {
     console.log(req.body); //this is still undefined
     res.sendFile(__dirname + '/html/index.html');
-})
+});
 app.get('/client_game.js', function(req, res, next) {
     res.sendFile(__dirname + '/client_game.js');
 });
