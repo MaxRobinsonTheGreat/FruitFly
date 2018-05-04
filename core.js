@@ -8,12 +8,13 @@
     exports.getDefaultBox = function(){return {x: 20, y:20, lw:20};};
 
     exports.moveBox = function(box, key, time){
+      var moved_box = Object.assign({}, box);
       dist = (time/1000)*box_spd;
-      if(key.left) box.x-=dist;
-      if(key.right) box.x+=dist;
-      if(key.up) box.y-=dist;
-      if(key.down) box.y+=dist;
-      return(box);
+      if(key.left) moved_box.x-=dist;
+      if(key.right) moved_box.x+=dist;
+      if(key.up) moved_box.y-=dist;
+      if(key.down) moved_box.y+=dist;
+      return(moved_box);
     }
 
     exports.checkBoundry = function(box){

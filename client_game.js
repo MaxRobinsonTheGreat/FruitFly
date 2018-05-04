@@ -6,14 +6,14 @@ var box_spd = core.getBoxSpeed();
 var box = core.getDefaultBox();
 var others = [];
 
-var key = {left:false, right:false, up:false, down:false}
+var key = {left:false, right:false, up:false, down:false};
 var self_index = "";
 
 var last_update = 0;
 var delta_time = 0;
 
 
-var socket = io.connect('http://192.168.67.1:4200/');
+var socket = io.connect('http://192.168.15.1:4200/');
 
 socket.on('connect', function(data) {
    socket.emit('join', 'Hello World from client');
@@ -41,19 +41,25 @@ function updateDeltaTime() {
   last_update = Date.now();
 }
 
-function updateBoxPositions() {
-  box = core.moveBox(box, key, delta_time);
-
-  var boundry_result = core.checkBoundry(box);
-  box = boundry_result.box;
-
+function collided(b){
   for(i in others){
     if(i != self_index){
-      if(core.collision(box, others[i].box)){
-        console.log("Collision!");
+      if(core.collision(b, others[i].box)){
+        return true;
       }
     }
   }
+  return false;
+}
+
+function updateBoxPositions() {
+  var moved_box = core.moveBox(box, key, delta_time);
+  if(!collided(moved_box)){
+    box = moved_box;
+  }
+
+  var boundry_result = core.checkBoundry(box);
+  box = boundry_result.box;
 }
 
 
