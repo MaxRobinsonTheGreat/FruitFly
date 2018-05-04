@@ -48,6 +48,9 @@ io.on('connection', function(client) {
   });
 
   client.on('init_client', function(data){
+    while(collided(data, key)){
+      data.x+=data.lw+10;
+    }
     clients.set(key, {
       box: data,
       moves: {left:false, right:false, up:false, down:false}
@@ -56,9 +59,11 @@ io.on('connection', function(client) {
   });
 
   client.on('move', function(data){
+    if(!clients.has(key)){return;}
     clients.get(key).moves = data.moves;
   });
   client.on('stop', function(data){
+    if(!clients.has(key)){return;}
     clients.get(key).moves = data.moves;
     var server_box = clients.get(key).box;
     var predicted_box = data.box;
@@ -74,9 +79,11 @@ io.on('connection', function(client) {
 
   client.on('disconnect', function(data){
     clients.delete(key);
+    clientbodies.delete(key);
     console.log("Client " + key + " disconnected.");
   });
 });
+
 
 
 
@@ -102,7 +109,16 @@ function UpdateState(){
 
   clients.forEach(function update(value, key, map){
 
-    value.box = game_core.moveBox(value.box, value.moves, delta_time);
+    var moved_box = game_core.moveBox(value.box, value.moves, delta_time);
+    var collision = collided(moved_box, key);
+
+    if(!collision){
+      value.box = moved_box;
+    }
+    else{
+      clientbodies.get(key).emit('correction', value.box);
+    }
+
     var send_correction = false;
 
     var boundry_result = game_core.checkBoundry(value.box);
@@ -116,11 +132,25 @@ function UpdateState(){
   }
 }
 
+function collided(b, self_key){
+  var result = false;
+  clients.forEach(function update(value, key, map){
+    if(key != self_key){
+      if(game_core.collision(b, value.box)){
+        result = true;
+        return;
+      }
+    }
+  });
+  return result;
+}
+
   //  -- SEND TO CLIENTS --
 function update_clients(){
   // update all clients with the info relevant to them about the world and the other clients
   clientbodies.forEach(function update(value, key, map){
-    value.broadcast.emit('all', Array.from(clients.values()));
+    self_index = Array.from(clients.keys()).indexOf(key);
+    value.emit('all', {clients: Array.from(clients.values()), self_index: self_index});
   });
   should_update = true;
 }
