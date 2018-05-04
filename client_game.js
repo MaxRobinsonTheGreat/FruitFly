@@ -13,7 +13,7 @@ var last_update = 0;
 var delta_time = 0;
 
 
-var socket = io.connect('http://192.168.15.1:4200/');
+var socket = io.connect('http://10.24.194.226:4200/');
 
 socket.on('connect', function(data) {
    socket.emit('join', 'Hello World from client');
