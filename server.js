@@ -234,13 +234,13 @@ function update_clients(){
   // update all clients with the info relevant to them about the world and the other clients
   var locations = new Map();
   clients.forEach(function getLocations(value, key, map){
-    locations.set(key, value); // you're pushing the whole client object into the map. just push the location values
+    locations.set(key, value.getBody()); // you're pushing the whole client object into the map. just push the location values
   });                          // I don't think the client class even has a location data field.
 
   clients.forEach(function update(value, key, map){
     self_index = Array.from(locations.keys()).indexOf(key);
 
-    console.log( Array.from(locations.values())); // this guy prints everything
+    // console.log( Array.from(locations.values())); // this guy prints everything
 
     value.getConnection().emit('all', {clients: Array.from(locations.values()), self_index: self_index});
   });
