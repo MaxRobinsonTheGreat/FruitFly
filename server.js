@@ -236,7 +236,6 @@ function collided(b, self_key){
 function update_clients(){
   // update all clients with the info relevant to them about the world and the other clients
   var locations = new Map();
-  console.log(clients.size);
   clients.forEach(function getLocations(value, key, map){
     locations.set(key, value);
   });
