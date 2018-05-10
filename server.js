@@ -169,7 +169,6 @@ io.on('connection', function(oldClient) {
 var physics_loop;
 var update_per_sec = 66;
 var client_update_waitTime = 45; //millis
-var should_update = false;
 
 // Date.now() returns the number of millis since 1970. Use to calculate delta time
 var last_update = Date.now();
@@ -201,8 +200,6 @@ function UpdateState(){
       // if there was a collision send a correction to the client
       clientbodies.get(key).getConnection.emit('correction', value.getBody());
     }
-
-    var send_correction = false;
 
     // check for boundary collisions
     var boundry_result = game_core.checkBoundry(value.getBody());
@@ -237,13 +234,16 @@ function update_clients(){
   // update all clients with the info relevant to them about the world and the other clients
   var locations = new Map();
   clients.forEach(function getLocations(value, key, map){
-    locations.set(key, value);
-  });
+    locations.set(key, value); // you're pushing the whole client object into the map. just push the location values
+  });                          // I don't think the client class even has a location data field.
+
   clients.forEach(function update(value, key, map){
     self_index = Array.from(locations.keys()).indexOf(key);
+
+    console.log( Array.from(locations.values())); // this guy prints everything
+
     value.getConnection().emit('all', {clients: Array.from(locations.values()), self_index: self_index});
   });
-  should_update = true;
 }
 
 /*
