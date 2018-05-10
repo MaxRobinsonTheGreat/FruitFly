@@ -203,7 +203,7 @@ function UpdateState(){
 
     // check for boundary collisions
     var boundry_result = game_core.checkBoundry(value.getBody());
-    value.setBody(boundry_result);
+    value.setBody(boundry_result.box);
 
   });
 
