@@ -198,7 +198,7 @@ function UpdateState(){
     }
     else{
       // if there was a collision send a correction to the client
-      clientbodies.get(key).getConnection.emit('correction', value.getBody());
+      clientbodies.get(key).getConnection().emit('correction', value.getBody());
     }
 
     // check for boundary collisions
