@@ -1,6 +1,6 @@
 // server.js
 
-// Use the game core module 
+// Use the game core module
 const game_core = require("./core");
 console.log("SERVER: " + game_core.connection());
 
@@ -43,77 +43,101 @@ app.get('/html/login-page.html', function(req, res, next) {
     res.sendFile(__dirname + '/html/login-page.html')
 });
 
+class Client {
+  constructor(connection) {
+    this.connection = connection;
+  }
+  getConnection() {
+    return this.connection;
+  }
+
+  setBody(body) {
+    this.body = body;
+  }
+  getBody() {
+    return this.body;
+  }
+
+  setCommands(commands) {
+    this.commands = commands;
+  }
+  getCommands() {
+    return this.commands;
+  }
+}
+
 
 
 // -- ClIENT LISTENERS --
 server.listen(4200, '0.0.0.0'); // begin listening
 console.log("SERVER: listening...");
-io.on('connection', function(client) {
-  var key=(client_counter++)+""; 
+io.on('connection', function(oldClient) {
+  var key=(client_counter++)+"";
     /* The client counter increments with every added client, but does not decrement when a client leaves.
        It is used as a key in a map, not as an index in an array. */
 
+  var client = new Client(oldClient);
+
   console.log('Client ' + key + ' connected...');
 
-  client.on('join', function(data) {
+  client.getConnection().on('join', function(data) {
   });
 
-    
+
   /* API 'init_client'
      input: {x, y, lw}
       - avoids colliding start positions
       - initializes the client and clientbodies objects and puts into maps
       - restarts physics loop when the client is added to an empty client map
   */
-  client.on('init_client', function(data){
-    // keep incrementing x position untill no longer colliding 
+  client.getConnection().on('init_client', function(data){
+    // keep incrementing x position untill no longer colliding
     while(collided(data, key)){
       data.x+=data.lw+10;
     }
-      
+
     // put client info in maps
-    clients.set(key, {
-      box: data,
-      moves: {left:false, right:false, up:false, down:false}
-    });
-    clientbodies.set(key, client);
+    client.setCommands({left:false, right:false, up:false, down:false});
+    client.setBody(data);
+    clients.set(key, client);
+    clientbodies.set(key, oldClient);
 
     // initialize physics loop if this is the only client in the map
     if(clients.size === 1){
       init_physicsLoop();
     }
   });
-   
-    
+
+
   /* API 'move'
      input: {box:{x, y, lw}, moves:{left, right, up, down}}
-      - updates the client's move data 
+      - updates the client's move data
   */
-  client.on('move', function(data){
+  client.getConnection().on('move', function(data){
     if(!clients.has(key)){return;} // this line defends against incoming requests after the client has already been disconnected
-    clients.get(key).moves = data.moves;
+    clients.get(key).setCommands(data.moves);
   });
-    
-    
+
+
   /* API 'stop'
      input: {box:{x, y, lw}, moves:{left, right, up, down}}
       - updates the client's move data
       - checks if the clients prediction is too off
       - sends correction data to client if prediction is wrong
   */
-  client.on('stop', function(data){
+  client.getConnection().on('stop', function(data){
     if(!clients.has(key)){return;} // see first line of 'move' request
-    
+
     // get the server's authoritative position and the clients prediction
-    clients.get(key).moves = data.moves;
-    var server_box = clients.get(key).box;
+    clients.get(key).setCommands(data.moves);
+    var server_box = clients.get(key).getBody();
     var predicted_box = data.box;
-      
+
     // if the difference between the two is greater than the marigin of error send a correction
     var xDif = Math.abs(server_box.x - predicted_box.x);
     var yDif = Math.abs(server_box.y - predicted_box.y);
     if(xDif > margin_of_error || yDif > margin_of_error){
-        client.emit('correction', server_box);
+        client.getConnection().emit('correction', server_box);
     }
     else{
       server_box = predicted_box;
@@ -125,7 +149,7 @@ io.on('connection', function(client) {
       - removes the client data from the clients and clientbodies map
       - shuts down the physics loop if this was the last client to leave
   */
-  client.on('disconnect', function(data){
+  client.getConnection().on('disconnect', function(data){
     clients.delete(key);
     clientbodies.delete(key);
     console.log("Client " + key + " disconnected.");
@@ -160,29 +184,29 @@ function init_physicsLoop(){
 function UpdateState(){
   delta_time = Date.now() - last_update;
   last_update = Date.now();
-  
+
   // this gross foreachloop stuff needs to be cleaned up by creating a client class
   clients.forEach(function update(value, key, map){
 
     // calculate the next move
-    var moved_box = game_core.moveBox(value.box, value.moves, delta_time);  
+    var moved_box = game_core.moveBox(value.getBody(), value.getCommands(), delta_time);
     // see if the next move collides with another box
     var collision = collided(moved_box, key);
 
     if(!collision){
         // if there was no collision update the box's position
-      value.box = moved_box;
+      value.setBody(moved_box);
     }
     else{
       // if there was a collision send a correction to the client
-      clientbodies.get(key).emit('correction', value.box);
+      clientbodies.get(key).getConnection.emit('correction', value.getBody());
     }
 
     var send_correction = false;
-    
+
     // check for boundary collisions
-    var boundry_result = game_core.checkBoundry(value.box);
-    value.box = boundry_result.box;
+    var boundry_result = game_core.checkBoundry(value.getBody());
+    value.setBody(boundry_result);
 
   });
 
@@ -199,7 +223,7 @@ function collided(b, self_key){
   var result = false;
   clients.forEach(function update(value, key, map){
     if(key != self_key){
-      if(game_core.collision(b, value.box)){
+      if(game_core.collision(b, value.getBody())){
         result = true;
         return;
       }
@@ -211,9 +235,14 @@ function collided(b, self_key){
   //  -- SEND TO CLIENTS --
 function update_clients(){
   // update all clients with the info relevant to them about the world and the other clients
-  clientbodies.forEach(function update(value, key, map){
-    self_index = Array.from(clients.keys()).indexOf(key);
-    value.emit('all', {clients: Array.from(clients.values()), self_index: self_index});
+  var locations = new Map();
+  console.log(clients.size);
+  clients.forEach(function getLocations(value, key, map){
+    locations.set(key, value);
+  });
+  clients.forEach(function update(value, key, map){
+    self_index = Array.from(locations.keys()).indexOf(key);
+    value.getConnection().emit('all', {clients: Array.from(locations.values()), self_index: self_index});
   });
   should_update = true;
 }
@@ -225,8 +254,8 @@ SEND API
 
     -'correction'
         send data: {
-                    clients[ 
-                     { box:{x,y,lw}, moves:{right,left,up,down} } 
+                    clients[
+                     { box:{x,y,lw}, moves:{right,left,up,down} }
                       , {}, {}, ... ],
                     self_index
                    }

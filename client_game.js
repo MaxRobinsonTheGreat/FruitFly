@@ -52,7 +52,7 @@ function updateDeltaTime() {
 function collided(b){
   for(i in others){
     if(i != self_index){
-      if(core.collision(b, others[i].box)){
+      if(core.collision(b, others[i])){
         return true;
       }
     }
@@ -75,7 +75,7 @@ function updateOthers(){
 
   current_time = Date.now();
 
-  others = oldest_update.update.clients;
+  others = oldest_update.update.locations;
   self_index = oldest_update.update.self_index;
 
   if(update_queue.length === 0) return;
@@ -84,16 +84,16 @@ function updateOthers(){
     if (i >= update_queue[0].update.clients.length) break;
 
     if(i != self_index){
-      let startBox = oldest_update.update.clients[i].box;
-      let endBox = update_queue[0].update.clients[i].box;
+      let startBox = oldest_update.update.locations[i];
+      let endBox = update_queue[0].update.locations[i];
       let time_dif = update_queue[0].timestamp - oldest_update.timestamp;
 
       if(time_dif === 0) break;
 
-      others[i].box.x += ( ((endBox.x - startBox.x) / (time_dif))*
+      others[i].x += ( ((endBox.x - startBox.x) / (time_dif))*
                      (current_time - update_delay - oldest_update.timestamp));
 
-      others[i].box.y += ( ((endBox.y - startBox.y) / (time_dif))*
+      others[i].y += ( ((endBox.y - startBox.y) / (time_dif))*
                     (current_time - update_delay - oldest_update.timestamp));
     }
     else{
@@ -139,8 +139,8 @@ function Draw(){
   ctx.fillStyle = "red";
   for(i in others){
     if (i != self_index || draw_self_debugger){
-      ctx.fillRect(others[i].box.x, others[i].box.y,
-        others[i].box.lw, others[i].box.lw);
+      ctx.fillRect(others[i].x, others[i].y,
+        others[i].lw, others[i].lw);
     }
   }
 }
