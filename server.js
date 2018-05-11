@@ -1,7 +1,7 @@
 // server.js
 
 // Use the game core module
-const game_core = require("./core");
+const game_core = require("./game_core");
 console.log("SERVER: " + game_core.connection());
 
 
@@ -33,8 +33,8 @@ app.post('/user', function(req, res, next) {
 app.get('/client_game.js', function(req, res, next) {
     res.sendFile(__dirname + '/client_game.js');
 });
-app.get('/core.js', function(req, res, next) {
-    res.sendFile(__dirname + '/core.js');
+app.get('/game_core.js', function(req, res, next) {
+    res.sendFile(__dirname + '/game_core.js');
 });
 app.get('/css/master.css', function(req, res, next) {
     res.sendFile(__dirname + '/css/master.css');
@@ -51,11 +51,11 @@ class Client {
     return this.connection;
   }
 
-  setBody(body) {
-    this.body = body;
+  set player(body) {
+    this.clientBody = body;
   }
-  getBody() {
-    return this.body;
+  get player() {
+    return this.clientBody;
   }
 
   setCommands(commands) {
@@ -98,7 +98,7 @@ io.on('connection', function(oldClient) {
 
     // put client info in maps
     client.setCommands({left:false, right:false, up:false, down:false});
-    client.setBody(data);
+    client.player = new game_core.Entity(data.location, data.dimension);
     clients.set(key, client);
     clientbodies.set(key, oldClient);
 
@@ -130,7 +130,7 @@ io.on('connection', function(oldClient) {
 
     // get the server's authoritative position and the clients prediction
     clients.get(key).setCommands(data.moves);
-    var server_box = clients.get(key).getBody();
+    var server_box = clients.get(key).player;
     var predicted_box = data.box;
 
     // if the difference between the two is greater than the marigin of error send a correction
@@ -188,22 +188,22 @@ function UpdateState(){
   clients.forEach(function update(value, key, map){
 
     // calculate the next move
-    var moved_box = game_core.moveBox(value.getBody(), value.getCommands(), delta_time);
+    var moved_box = game_core.moveLocation(value.player, value.getCommands(), delta_time);
     // see if the next move collides with another box
     var collision = collided(moved_box, key);
 
     if(!collision){
         // if there was no collision update the box's position
-      value.setBody(moved_box);
+      value.player.location = moved_box;
     }
     else{
       // if there was a collision send a correction to the client
-      clientbodies.get(key).getConnection().emit('correction', value.getBody());
+      clients.get(key).getConnection().emit('correction', value.player);
     }
 
     // check for boundary collisions
-    var boundry_result = game_core.checkBoundry(value.getBody());
-    value.setBody(boundry_result.box);
+    var boundry_result = game_core.checkBoundry(value.player);
+    value.player = boundry_result.box;
 
   });
 
@@ -220,7 +220,7 @@ function collided(b, self_key){
   var result = false;
   clients.forEach(function update(value, key, map){
     if(key != self_key){
-      if(game_core.collision(b, value.getBody())){
+      if(game_core.collision(b, value.player)){
         result = true;
         return;
       }
@@ -234,13 +234,11 @@ function update_clients(){
   // update all clients with the info relevant to them about the world and the other clients
   var locations = new Map();
   clients.forEach(function getLocations(value, key, map){
-    locations.set(key, value.getBody()); // you're pushing the whole client object into the map. just push the location values
+    locations.set(key, value.player); // you're pushing the whole client object into the map. just push the location values
   });                          // I don't think the client class even has a location data field.
 
   clients.forEach(function update(value, key, map){
     self_index = Array.from(locations.keys()).indexOf(key);
-
-    // console.log( Array.from(locations.values())); // this guy prints everything
 
     value.getConnection().emit('all', {clients: Array.from(locations.values()), self_index: self_index});
   });

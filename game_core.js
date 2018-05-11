@@ -3,29 +3,43 @@
         -default values
         -classes/object structures
         -behavior functions
-        
-    This avoids code duplication and ensures that the code is EXACTLY the same between the server and client where it matters. 
-    It's important to note that no DATA is being shared (or even could be shared) through this file, only functionality. 
+
+    This avoids code duplication and ensures that the code is EXACTLY the same between the server and client where it matters.
+    It's important to note that no DATA is being shared (or even could be shared) through this file, only functionality.
     The server and client(s) have their own copies of this file and cannot communicate through the core.
 */
 
 (function(exports){
-
+    exports.Entity = class {
+      constructor(location, dimensions) {
+        this.playerLocation = location;
+        this.playerDimensions = dimensions;
+      }
+      get location() {
+        return this.playerLocation;
+      }
+      get dimensions() {
+        return this.playerDimensions;
+      }
+    }
 
     var box_spd = 100; //px per second
-    var default_box = {x:20, y:20, lw:20}; //intitial box pos/size
+    // var default_box = {x:20, y:20, lw:20}; //intitial box pos/size
 
     exports.getBoxSpeed = function(){return box_spd;};
-    exports.getDefaultBox = function(){return {x: 20, y:20, lw:20};};
+    exports.getDefaultBox = function(){return {
+      location: {x: 20, y:20},
+      dimension: {lw:20}};
+    };
 
-    exports.moveBox = function(box, key, time){
-      var moved_box = Object.assign({}, box);
+    exports.moveLocation = function(location, key, time){
+      var moved_location = Object.assign({}, location);
       dist = (time/1000)*box_spd;
-      if(key.left) moved_box.x-=dist;
-      if(key.right) moved_box.x+=dist;
-      if(key.up) moved_box.y-=dist;
-      if(key.down) moved_box.y+=dist;
-      return(moved_box);
+      if(key.left) moved_location.x-=dist;
+      if(key.right) moved_location.x+=dist;
+      if(key.up) moved_location.y-=dist;
+      if(key.down) moved_location.y+=dist;
+      return(moved_location);
     }
 
     exports.checkBoundry = function(box){
@@ -52,4 +66,4 @@
 
 
 
-})(typeof exports === 'undefined'? this['core']={}: exports);
+})(typeof exports === 'undefined'? this['game_core']={}: exports);

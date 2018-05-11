@@ -2,8 +2,8 @@ var ctx;
 var interval;
 
 var FPS = 60;
-var box_spd = core.getBoxSpeed();
-var box = core.getDefaultBox();
+var box_spd = game_core.getBoxSpeed();
+var box = game_core.getDefaultBox();
 var others = [];
 
 var key = {left:false, right:false, up:false, down:false};
@@ -52,7 +52,7 @@ function updateDeltaTime() {
 function collided(b){
   for(i in others){
     if(i != self_index){
-      if(core.collision(b, others[i])){
+      if(game_core.collision(b, others[i])){
         return true;
       }
     }
@@ -61,12 +61,12 @@ function collided(b){
 }
 
 function updateBoxPositions() {
-  var moved_box = core.moveBox(box, key, delta_time);
+  var moved_box = game_core.moveBox(box, key, delta_time);
   if(!collided(moved_box)){
     box = moved_box;
   }
 
-  var boundry_result = core.checkBoundry(box);
+  var boundry_result = game_core.checkBoundry(box);
   box = boundry_result.box;
 }
 
@@ -74,8 +74,8 @@ function updateOthers(){
   if(oldest_update === undefined || update_queue === undefined) return;
 
   current_time = Date.now();
-
-  others = oldest_update.update.locations;
+  // console.log(oldest_update.update);
+  others = oldest_update.update.clients;
   self_index = oldest_update.update.self_index;
 
   if(update_queue.length === 0) return;
@@ -84,8 +84,8 @@ function updateOthers(){
     if (i >= update_queue[0].update.clients.length) break;
 
     if(i != self_index){
-      let startBox = oldest_update.update.locations[i];
-      let endBox = update_queue[0].update.locations[i];
+      let startBox = oldest_update.update.clients[i];
+      let endBox = update_queue[0].update.clients[i];
       let time_dif = update_queue[0].timestamp - oldest_update.timestamp;
 
       if(time_dif === 0) break;
@@ -119,7 +119,7 @@ function Update(){
   emitToServer('move');
 }
 socket.on('all', function(data) {
-    //console.log(data);
+    // console.log(data);
     update_queue.push({update: data, timestamp: Date.now()});
     if(oldest_update === undefined){
       others = data.clients;
