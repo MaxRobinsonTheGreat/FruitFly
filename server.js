@@ -4,7 +4,7 @@
 
 // Use the game core module
 const game_core = require("./game_core");
-console.log("SERVER: " + game_core.connection());
+Log("SERVER: " + game_core.connection());
 
 // Use express to open a web server
 var express = require('express');
@@ -46,11 +46,22 @@ class Client {
     this.connection = connection;
   }
 }
+function Log(message){
+  var date = new Date();
+  var meridian = "AM";
+  var hour = date.getHours();
+  if(hour>12){
+    hour-=12;
+    meridian = "PM";
+  }
+  console.log(date.getMonth()+"-"+date.getDate()+"-"+date.getFullYear()
+              +" "+hour+":"+date.getMinutes()+meridian+"\t"+message);
+}
 
 
 // -- ClIENT LISTENERS --
 server.listen(4200, '0.0.0.0'); // begin listening
-console.log("SERVER: listening...");
+Log("SERVER: listening...");
 
 io.on('connection', function(new_client) {
   var cur_name = (client_counter++)+"";
@@ -59,7 +70,7 @@ io.on('connection', function(new_client) {
 
   var client = new Client(new_client);
 
-  console.log('Client ' + cur_name + ' connected...');
+  Log('Client ' + cur_name + ' connected.');
 
   new_client.on('join', function(data) {
   });
@@ -134,11 +145,11 @@ io.on('connection', function(new_client) {
   */
   new_client.on('disconnect', function(data){
     clients.delete(cur_name);
-    console.log("Client " + cur_name + " disconnected.");
+    Log("Client " + cur_name + " disconnected.");
 
     if(clients.size === 0){
         clearInterval(physics_loop);
-        console.log("SERVER: No remaining clients. Physics loop shut down.");
+        Log("SERVER: No remaining clients. Physics loop shut down.");
     }
   });
 });
@@ -159,7 +170,7 @@ var delta_time;
 
 function init_physicsLoop(){
   physics_loop = setInterval(function(){UpdateState();}, 1000/update_per_sec);
-  console.log("SERVER: physics loop initialized");
+  Log("SERVER: physics loop initialized");
 }
 
 function UpdateState(){
