@@ -10,55 +10,67 @@
 */
 
 (function(exports){
-    exports.Entity = class {
-      constructor(location, dimensions) {
-        this.playerLocation = location;
-        this.playerDimensions = dimensions;
+
+
+
+    exports.getLocationObj = function(x, y){
+      return {x, y};
+    }
+    exports.getDimensionsObj = function(l, w){
+      return {l, w};
+    }
+    exports.getCommandsObj = function(){
+      return {left: false, right: false, up: false, down: false};
+    }
+
+    exports.Player = class {
+      constructor() {
+        this.location = {x:20, y:20};
+        this.dimensions = {l:20, w:20};
+        this.commands = {left: false, right: false, up: false, down: false};
+        this.speed = 100;
       }
-      get location() {
-        return this.playerLocation;
-      }
-      get dimensions() {
-        return this.playerDimensions;
+
+      move(time){
+        var old_loc = Object.assign({}, this.location);
+        var dist = (time/1000)*this.speed;
+        if(this.commands.left) this.location.x-=dist;
+        if(this.commands.right) this.location.x+=dist;
+        if(this.commands.up) this.location.y-=dist;
+        if(this.commands.down) this.location.y+=dist;
+        return(old_loc);
       }
     }
 
-    var box_spd = 100; //px per second
-    // var default_box = {x:20, y:20, lw:20}; //intitial box pos/size
-
-    exports.getBoxSpeed = function(){return box_spd;};
-    exports.getDefaultBox = function(){return {
-      location: {x: 20, y:20},
-      dimension: {lw:20}};
-    };
-
-    exports.moveLocation = function(location, key, time){
-      var moved_location = Object.assign({}, location);
-      dist = (time/1000)*box_spd;
-      if(key.left) moved_location.x-=dist;
-      if(key.right) moved_location.x+=dist;
-      if(key.up) moved_location.y-=dist;
-      if(key.down) moved_location.y+=dist;
-      return(moved_location);
-    }
-
-    exports.checkBoundry = function(box){
+    exports.checkBoundry = function(loc, dim){
       var was_correction = false;
-      if(box.x + box.lw > 600) {box.x = 600-box.lw;was_correction = true}
-      if(box.y + box.lw > 400) {box.y = 400-box.lw;was_correction = true}
-      if(box.x < 0) {box.x = 0;was_correction = true}
-      if(box.y < 0) {box.y = 0;was_correction = true}
-      return {box, was_correction};
+      if(loc.x + dim.w > 600) {loc.x = 600-dim.w;was_correction = true}
+      if(loc.y + dim.l > 400) {loc.y = 400-dim.l;was_correction = true}
+      if(loc.x < 0) {loc.x = 0;was_correction = true}
+      if(loc.y < 0) {loc.y = 0;was_correction = true}
+      return {loc, was_correction};
     }
 
-    exports.collision = function(b1, b2){
-      return (b1.x+b1.lw > b2.x && b1.x < b2.x+b2.lw &&
-              b1.y+b1.lw > b2.y && b1.y < b2.y+b2.lw)
+    var check_intersect = exports.intersect = function(rect1, rect2){
+      let loc1 = rect1.location;
+      let dim1 = rect1.dimensions;
+      let loc2 = rect2.location;
+      let dim2 = rect2.dimensions;
+
+      return (loc1.x+dim1.w > loc2.x && loc1.x < loc2.x+dim2.w &&
+              loc1.y+dim1.l > loc2.y && loc1.y < loc2.y+dim2.l)
     }
-    // A new  function should be added that is given a box, a list of boxes, and an index.
-    // It returns true if any of the boxes in the list collides with the given box besides the one at the specified index.
-    // This new function should not replace the function collision(), but should call it instead.
-    // That way the client/server has access to the collision function and its subfunction, which may need to be used by itself
+
+
+    exports.anyIntersect = function(primary, list, to_ignore){
+        for(i in list){
+          if(i==to_ignore) break;
+          if(check_intersect(primary, list[i])){
+            return true;
+          }
+        }
+        return false;
+    };
 
     exports.connection = function(){
         return "core module connected";
