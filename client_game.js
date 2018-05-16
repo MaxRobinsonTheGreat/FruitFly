@@ -1,13 +1,16 @@
+//client_game.js
+
+'use strict';
+
 var ctx;
 var interval;
 
 var FPS = 60;
-var box_spd = core.getBoxSpeed();
-var box = core.getDefaultBox();
+
+var main_player = new game_core.Player();
 var others = [];
 
-var key = {left:false, right:false, up:false, down:false};
-var self_index = "";
+var self_index = -1;
 
 var last_update = 0;
 var delta_time = 0;
@@ -18,7 +21,6 @@ var update_delay = 100; //millis
 
 // set to true if you want to see the most recent server's version of the main players box
 var draw_self_debugger = false;
-
 
 // connects at the ip addess and port of the page
 var socket = io.connect();
@@ -39,9 +41,21 @@ function main(){
   intializeCanvasControls();
 
   last_update = Date.now();
-  curInterval = setInterval(function(){Update();Draw(ctx);}, 1000/FPS)
+  interval = setInterval(function(){Update();Draw(ctx);}, 1000/FPS);
 
-  socket.emit('init_client', box);
+  //make sure the default position is not collideing with anything
+  socket.emit('init_client', main_player.location);
+}
+
+//        --- UPDATE ---
+function Update(){
+  updateDeltaTime();
+
+  updateOthers();
+
+  updatePlayerPosition();
+
+  socket.emit('move', main_player.commands);
 }
 
 function updateDeltaTime() {
@@ -49,55 +63,35 @@ function updateDeltaTime() {
   last_update = Date.now();
 }
 
-function collided(b){
-  for(i in others){
-    if(i != self_index){
-      if(core.collision(b, others[i].box)){
-        return true;
-      }
-    }
-  }
-  return false;
-}
+function updatePlayerPosition() {
+  var old_loc = main_player.move(delta_time);
 
-function updateBoxPositions() {
-  var moved_box = core.moveBox(box, key, delta_time);
-  if(!collided(moved_box)){
-    box = moved_box;
+  if(game_core.anyIntersect(main_player, others, self_index)){
+    main_player.location = old_loc;
   }
 
-  var boundry_result = core.checkBoundry(box);
-  box = boundry_result.box;
+  var boundry_result = game_core.checkBoundry(main_player.location, main_player.dimensions);
+  main_player.location = boundry_result.loc;
 }
 
 function updateOthers(){
   if(oldest_update === undefined || update_queue === undefined) return;
 
-  current_time = Date.now();
 
-  others = oldest_update.update.clients;
-  self_index = oldest_update.update.self_index;
+  setState(oldest_update.state);
 
   if(update_queue.length === 0) return;
 
-  for(i in others){
-    if (i >= update_queue[0].update.clients.length) break;
+  let current_time = Date.now();
 
-    if(i != self_index){
-      let startBox = oldest_update.update.clients[i].box;
-      let endBox = update_queue[0].update.clients[i].box;
-      let time_dif = update_queue[0].timestamp - oldest_update.timestamp;
-
-      if(time_dif === 0) break;
-
-      others[i].box.x += ( ((endBox.x - startBox.x) / (time_dif))*
-                     (current_time - update_delay - oldest_update.timestamp));
-
-      others[i].box.y += ( ((endBox.y - startBox.y) / (time_dif))*
-                    (current_time - update_delay - oldest_update.timestamp));
-    }
+  for(var i in others){
+    if (i >= update_queue[0].state.locations.length)
+      break;
+    if(i != self_index)
+      interpolateEntityAt(i, current_time);
     else{
-      others[i] = update_queue[update_queue.length-1].update.clients[i];
+      var index = update_queue[update_queue.length-1].state.self_index;
+      others[i].location = update_queue[update_queue.length-1].state.locations[index];
     }
   }
 
@@ -105,75 +99,114 @@ function updateOthers(){
   while(update_queue.length !== 0 && current_time-update_queue[0].timestamp >= update_delay){
     oldest_update = update_queue.shift();
   }
-
 }
 
 
-function Update(){
-  updateDeltaTime();
+function interpolateEntityAt(i, current_time){
+  let startloc = oldest_update.state.locations[i];
+  let endloc = update_queue[0].state.locations[i];
+  let time_dif = update_queue[0].timestamp - oldest_update.timestamp;
 
-  updateOthers();
+  // we divide by time_dif, so make sure it's not zero
+  if(time_dif === 0) return;
 
-  updateBoxPositions();
+  others[i].location.x += ( ((endloc.x - startloc.x) / (time_dif))*
+                 (current_time - update_delay - oldest_update.timestamp));
 
-  emitToServer('move');
+  others[i].location.y += ( ((endloc.y - startloc.y) / (time_dif))*
+                (current_time - update_delay - oldest_update.timestamp));
 }
-socket.on('all', function(data) {
-    //console.log(data);
-    update_queue.push({update: data, timestamp: Date.now()});
-    if(oldest_update === undefined){
-      others = data.clients;
-      self_index = data.self_index;
-      oldest_update = {update: data, timestamp: Date.now()};
+
+function setState(state){
+  if(others.length !== state.locations.length){
+    others = []; //clear others[]
+
+    for(var i in state.locations){
+      others.push({
+        location: state.locations[i],
+        dimensions: game_core.getDimensionsObj(20, 20)
+      });
     }
+  }
+  else{
+    for(var i in others){
+      others[i].location = state.locations[i];
+    }
+  }
+
+  self_index = state.self_index;
+}
+
+
+//        --- SERVER LISTENERS ---
+/* API 'all'
+   input: {locations: [{x,y},{x,y},...]}
+    - pushes the new state into the update queue
+*/
+socket.on('all', function(state) {
+    if(oldest_update === undefined){
+      setState(state);
+      oldest_update = {state, timestamp: Date.now()};
+    }
+    else{
+      update_queue.push({state, timestamp: Date.now()});
+    }
+
 });
-socket.on('correction', function(new_box){
-  box = new_box;
+/* API 'correction'
+   input: {x,y}
+    - pushes the new state into the update queue
+*/
+socket.on('correction', function(corrected_location){
+  main_player.location = corrected_location;
 });
 
 
+
+//      --- DRAW ---
 function Draw(){
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  ctx.fillStyle = "blue";
-	ctx.fillRect(box.x, box.y, box.lw, box.lw);
-  ctx.fillStyle = "red";
-  for(i in others){
-    if (i != self_index || draw_self_debugger){
-      ctx.fillRect(others[i].box.x, others[i].box.y,
-        others[i].box.lw, others[i].box.lw);
+
+	drawBox(main_player, "blue");
+
+  for(var i in others){
+    if (i != self_index || draw_self_debugger && i < others.length){
+       drawBox(others[i], "red");
     }
   }
 }
+function drawBox(box, color){
+  ctx.fillStyle = color;
+  ctx.fillRect(box.location.x, box.location.y,
+               box.dimensions.l, box.dimensions.w);
+}
 
 
+
+//      --- CONTROL LISTENERS ---
 var KEY_UP=38, KEY_DOWN=40, KEY_LEFT=37, KEY_RIGHT=39;
 function checkKeyDown(evt) {
   evt.preventDefault();
   if (evt.keyCode == KEY_LEFT)
-    key.left = true;
+    main_player.commands.left = true;
   if (evt.keyCode == KEY_RIGHT)
-    key.right = true;
+    main_player.commands.right = true;
   if (evt.keyCode == KEY_UP)
-    key.up = true;
+    main_player.commands.up = true;
   if (evt.keyCode == KEY_DOWN)
-    key.down = true;
-}
-
-function emitToServer(emitName) {
-  var pack = {box: box, moves: key, timestamp:Date.now()};
-  socket.emit(emitName, pack);
+    main_player.commands.down = true;
 }
 
 function checkKeyUp(evt){
   evt.preventDefault();
   if (evt.keyCode == KEY_LEFT)
-    key.left = false;
+    main_player.commands.left = false;
   if (evt.keyCode == KEY_RIGHT)
-    key.right = false;
+    main_player.commands.right = false;
   if (evt.keyCode == KEY_UP)
-    key.up = false;
+    main_player.commands.up = false;
   if (evt.keyCode == KEY_DOWN)
-    key.down = false;
+    main_player.commands.down = false;
 
-  emitToServer('stop');
+  socket.emit('stop', main_player.location);
 }
