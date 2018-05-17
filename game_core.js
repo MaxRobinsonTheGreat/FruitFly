@@ -28,7 +28,7 @@
         this.location = {x:20, y:20};
         this.dimensions = {l:20, w:20};
         this.commands = {left: false, right: false, up: false, down: false};
-        this.speed = 100;
+        this.speed = 100; //pixels per second
       }
 
       move(time){
@@ -64,8 +64,7 @@
 
     exports.anyIntersect = function(primary, list, to_ignore){
         for(i in list){
-          if(i==to_ignore) break;
-          if(check_intersect(primary, list[i])){
+          if(i!=to_ignore && check_intersect(primary, list[i])){
             return true;
           }
         }

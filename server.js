@@ -142,8 +142,7 @@ io.on('connection', function(new_client) {
   new_client.on('stop', function(predicted_location){
     if(!clients.has(cur_name)){return;} // see first line of 'move' request
 
-    // get the server's authoritative position and the clients prediction
-    // clients.get(cur_name).commands = pl;
+    // get the server's authoritative position
     var server_location = clients.get(cur_name).player.location;
 
     // if the difference between the two is greater than the marigin of error send a correction
@@ -153,7 +152,7 @@ io.on('connection', function(new_client) {
         client.connection.emit('correction', server_location);
     }
     else{
-      server_location = predicted_location;
+      clients.get(cur_name).player.location = predicted_location;
     }
   });
 
@@ -254,7 +253,7 @@ function update_clients(){
 /*
 SEND API
     -'all'
-        send data: [{x,y},{x,y}]
+        send data: {locations:[{x,y},{x,y},...], self_index}
 
     -'correction'
         send data: {x, y}

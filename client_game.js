@@ -55,7 +55,7 @@ function Update(){
 
   updatePlayerPosition();
 
-  socket.emit('move', main_player.commands);
+  // socket.emit('move', main_player.commands);
 }
 
 function updateDeltaTime() {
@@ -195,6 +195,8 @@ function checkKeyDown(evt) {
     main_player.commands.up = true;
   if (evt.keyCode == KEY_DOWN)
     main_player.commands.down = true;
+
+  socket.emit('move', main_player.commands);
 }
 
 function checkKeyUp(evt){
@@ -208,5 +210,6 @@ function checkKeyUp(evt){
   if (evt.keyCode == KEY_DOWN)
     main_player.commands.down = false;
 
+  socket.emit('move', main_player.commands);
   socket.emit('stop', main_player.location);
 }
