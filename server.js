@@ -47,9 +47,10 @@ class Client {
   }
 }
 function Log(message){
+  var timezoneOffsetHours = 6; //this is the offset for Mountain time in Utah, so the logging will be more clear to us
   var date = new Date();
   var meridian = "AM";
-  var hour = date.getHours();
+  var hour = date.getUTCHours()-timezoneOffsetHours;
   if(hour>12){
     hour-=12;
     meridian = "PM";
