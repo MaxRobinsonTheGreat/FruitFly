@@ -17,7 +17,7 @@ var client_counter=0; //increments with every added client
 
 const margin_of_error = 2; //the client box prediction can be within 2 px of the server prediction
 
-
+var date = new Date();
 
 // -- ROUTING --
 app.use(express.static(__dirname + '/node_modules'));
@@ -46,10 +46,19 @@ class Client {
     this.connection = connection;
   }
 }
-function Log(message){
-  var date = new Date();
 
-  const timezoneOffsetHours = 6; //this is the offset for Mountain time in Utah, so the logging will be more clear to us
+function Log(message){
+  var new_d = new Date();
+
+  if(date === undefined ||
+     date.getDate() !== new_d.getDate() ||
+     date.getMonth() !== new_d.getMonth() ||
+     date.getYear() !== new_d.getYear() ) {
+      console.log((new_d.getMonth()+1)+"-"+new_d.getDate()+"-"+new_d.getFullYear());
+  }
+  date = new_d;
+
+  const timezoneOffsetHours = 6; //this is the offset for Mountain time, so the logging will be more clear to us
   var meridian = "AM";
   var hour = date.getUTCHours()-timezoneOffsetHours;
   if(hour>12){
@@ -61,8 +70,11 @@ function Log(message){
   if(minute < 10){
     minute = "0"+minute;
   }
-  console.log(date.getMonth()+"-"+date.getDate()+"-"+date.getFullYear()
-              +" "+hour+":" + minute + meridian + "\t"+message);
+
+  var date_string = hour+":"+minute+meridian;
+  date_string = date_string.padEnd(10);
+
+  console.log(date_string+"| "+message);
 }
 
 
