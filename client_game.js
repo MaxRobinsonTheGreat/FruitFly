@@ -43,7 +43,7 @@ function main(){
   last_update = Date.now();
   interval = setInterval(function(){Update();Draw(ctx);}, 1000/FPS);
 
-  //make sure the default position is not collideing with anything
+  //make sure the default position is not colliding with anything
   socket.emit('init_client', main_player.location);
 }
 
@@ -51,9 +51,9 @@ function main(){
 function Update(){
   updateDeltaTime();
 
-  updateOthers();
-
   updatePlayerPosition();
+
+  updateOthers();
 
   // socket.emit('move', main_player.commands);
 }
@@ -187,13 +187,13 @@ function drawBox(box, color){
 var KEY_UP=38, KEY_DOWN=40, KEY_LEFT=37, KEY_RIGHT=39;
 function checkKeyDown(evt) {
   evt.preventDefault();
-  if (evt.keyCode == KEY_LEFT)
+  if (evt.keyCode === KEY_LEFT)
     main_player.commands.left = true;
-  if (evt.keyCode == KEY_RIGHT)
+  if (evt.keyCode === KEY_RIGHT)
     main_player.commands.right = true;
-  if (evt.keyCode == KEY_UP)
+  if (evt.keyCode === KEY_UP)
     main_player.commands.up = true;
-  if (evt.keyCode == KEY_DOWN)
+  if (evt.keyCode === KEY_DOWN)
     main_player.commands.down = true;
 
   socket.emit('move', main_player.commands);
@@ -201,13 +201,13 @@ function checkKeyDown(evt) {
 
 function checkKeyUp(evt){
   evt.preventDefault();
-  if (evt.keyCode == KEY_LEFT)
+  if (evt.keyCode === KEY_LEFT)
     main_player.commands.left = false;
-  if (evt.keyCode == KEY_RIGHT)
+  if (evt.keyCode === KEY_RIGHT)
     main_player.commands.right = false;
-  if (evt.keyCode == KEY_UP)
+  if (evt.keyCode === KEY_UP)
     main_player.commands.up = false;
-  if (evt.keyCode == KEY_DOWN)
+  if (evt.keyCode === KEY_DOWN)
     main_player.commands.down = false;
 
   socket.emit('move', main_player.commands);

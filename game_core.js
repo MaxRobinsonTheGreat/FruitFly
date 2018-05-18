@@ -10,9 +10,7 @@
 */
 
 (function(exports){
-
-
-
+  
     exports.getLocationObj = function(x, y){
       return {x, y};
     }
