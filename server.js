@@ -15,7 +15,7 @@ var io = require('socket.io')(server);
 var clients = new Map(); // contains socket connections and player objects
 var client_counter=0; //increments with every added client
 
-const margin_of_error = 2; //the client box prediction can be within 2 px of the server prediction
+const margin_of_error = 1; //the client box prediction can be within 2 px of the server prediction
 
 var date = new Date();
 
@@ -61,6 +61,7 @@ function Log(message){
   const timezoneOffsetHours = 6; //this is the offset for Mountain time, so the logging will be more clear to us
   var meridian = "AM";
   var hour = date.getUTCHours()-timezoneOffsetHours;
+
   if(hour<=0){
     hour+=12;
     meridian = "PM";

@@ -55,7 +55,7 @@ function Update(){
 
   updateOthers();
 
-  // socket.emit('move', main_player.commands);
+  // socket.emit('stop', main_player.location);
 }
 
 function updateDeltaTime() {
@@ -98,6 +98,7 @@ function updateOthers(){
 
   while(update_queue.length !== 0 && current_time-update_queue[0].timestamp >= update_delay){
     oldest_update = update_queue.shift();
+    socket.emit('stop', main_player.location);
   }
 }
 
@@ -210,6 +211,5 @@ function checkKeyUp(evt){
   if (evt.keyCode === KEY_DOWN)
     main_player.commands.down = false;
 
-  socket.emit('move', main_player.commands);
-  socket.emit('stop', main_player.location);
+  socket.emit('move', main_player.commands); 
 }
