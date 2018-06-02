@@ -3,8 +3,10 @@
 'use strict';
 
 // Use the game core module
-const game_core = require("./game_core");
-Log("SERVER: " + game_core.connection());
+const game_core = require("./public/src/game_core");
+const Logger = require("./logger");
+
+Logger.log("SERVER: " + game_core.connection());
 
 // Use express to open a web server
 var express = require('express');
@@ -17,29 +19,17 @@ var client_counter=0; //increments with every added client
 
 const margin_of_error = 1; //the client box prediction can be within 2 px of the server prediction
 
-var date = new Date();
-
 // -- ROUTING --
 app.use(express.static(__dirname + '/node_modules'));
+app.use(express.static(__dirname + '/public'));
 app.get('/', function(req, res, next) {
-    res.sendFile(__dirname + '/html/index.html');
+    res.sendFile(__dirname + '/public/html/index.html');
 });
 app.post('/user', function(req, res, next) {
     // console.log(req.body); //this is still undefined
     res.sendFile(__dirname + '/html/index.html');
 });
-app.get('/client_game.js', function(req, res, next) {
-    res.sendFile(__dirname + '/client_game.js');
-});
-app.get('/game_core.js', function(req, res, next) {
-    res.sendFile(__dirname + '/game_core.js');
-});
-app.get('/css/master.css', function(req, res, next) {
-    res.sendFile(__dirname + '/css/master.css');
-});
-app.get('/html/login-page.html', function(req, res, next) {
-    res.sendFile(__dirname + '/html/login-page.html')
-});
+
 
 class Client {
   constructor(connection) {
@@ -47,45 +37,10 @@ class Client {
   }
 }
 
-function Log(message){
-  var new_d = new Date();
-
-  if(date === undefined ||
-     date.getDate() !== new_d.getDate() ||
-     date.getMonth() !== new_d.getMonth() ||
-     date.getYear() !== new_d.getYear() ) {
-      console.log((new_d.getMonth()+1)+"-"+new_d.getDate()+"-"+new_d.getFullYear());
-  }
-  date = new_d;
-
-  const timezoneOffsetHours = 6; //this is the offset for Mountain time, so the logging will be more clear to us
-  var meridian = "AM";
-  var hour = date.getUTCHours()-timezoneOffsetHours;
-
-  if(hour<=0){
-    hour+=12;
-    meridian = "PM";
-  }
-  else if(hour>12){
-    hour-=12;
-    meridian = "PM";
-  }
-
-  var minute = date.getMinutes()+"";
-  if(minute < 10){
-    minute = "0"+minute;
-  }
-
-  var date_string = hour+":"+minute+" "+meridian;
-  date_string = date_string.padEnd(10);
-
-  console.log(date_string+"| "+message);
-}
-
 
 // -- ClIENT LISTENERS --
 server.listen(4200, '0.0.0.0'); // begin listening
-Log("SERVER: listening...");
+Logger.log("SERVER: listening...");
 
 io.on('connection', function(new_client) {
   var cur_name = (client_counter++)+"";
@@ -94,7 +49,7 @@ io.on('connection', function(new_client) {
 
   var client = new Client(new_client);
 
-  Log('Client ' + cur_name + ' connected.');
+  Logger.log('Client ' + cur_name + ' connected.');
 
   new_client.on('join', function(data) {
   });
@@ -168,11 +123,11 @@ io.on('connection', function(new_client) {
   */
   new_client.on('disconnect', function(data){
     clients.delete(cur_name);
-    Log("Client " + cur_name + " disconnected.");
+    Logger.log("Client " + cur_name + " disconnected.");
 
     if(clients.size === 0){
         clearInterval(physics_loop);
-        Log("SERVER: No remaining clients. Physics loop shut down.");
+        Logger.log("SERVER: No remaining clients. Physics loop shut down.");
     }
   });
 });
@@ -193,7 +148,7 @@ var delta_time;
 
 function init_physicsLoop(){
   physics_loop = setInterval(function(){UpdateState();}, 1000/update_per_sec);
-  Log("SERVER: physics loop initialized");
+  Logger.log("SERVER: physics loop initialized");
 }
 
 function UpdateState(){

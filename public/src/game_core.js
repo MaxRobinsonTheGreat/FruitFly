@@ -8,9 +8,8 @@
     It's important to note that no DATA is being shared (or even could be shared) through this file, only functionality.
     The server and client(s) have their own copies of this file and cannot communicate through the core.
 */
-
 (function(exports){
-  
+
     exports.getLocationObj = function(x, y){
       return {x, y};
     }
@@ -24,7 +23,7 @@
     exports.Player = class {
       constructor() {
         this.location = {x:20, y:20};
-        this.dimensions = {l:20, w:20};
+        this.dimensions = {l:100, w:50};
         this.commands = {left: false, right: false, up: false, down: false};
         this.speed = 100; //pixels per second
       }

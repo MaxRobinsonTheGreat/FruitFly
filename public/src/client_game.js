@@ -8,6 +8,10 @@ var interval;
 var FPS = 60;
 
 var main_player = new game_core.Player();
+main_player.sprite = new Sprite(image_container.get("Alien"));
+main_player.sprite.resizeBy(2);
+main_player.sprite.center(main_player.dimensions.l, main_player.dimensions.w);
+
 var others = [];
 
 var self_index = -1;
@@ -123,10 +127,16 @@ function setState(state){
     others = []; //clear others[]
 
     for(var i in state.locations){
+
       others.push({
         location: state.locations[i],
-        dimensions: game_core.getDimensionsObj(20, 20)
+        dimensions: game_core.getDimensionsObj(100, 50),
       });
+
+      var s = new Sprite(image_container.get("Person"));
+      s.resizeBy(.5);
+      s.center(others[i].dimensions.l, others[i].dimensions.w);
+      others[i].sprite = s;
     }
   }
   else{
@@ -169,17 +179,19 @@ function Draw(){
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
 	drawBox(main_player, "blue");
+  main_player.sprite.draw(main_player.location.x, main_player.location.y);
 
   for(var i in others){
     if (i != self_index || draw_self_debugger && i < others.length){
        drawBox(others[i], "red");
+       others[i].sprite.draw(others[i].location.x, others[i].location.y);
     }
   }
 }
 function drawBox(box, color){
   ctx.fillStyle = color;
   ctx.fillRect(box.location.x, box.location.y,
-               box.dimensions.l, box.dimensions.w);
+               box.dimensions.w, box.dimensions.l);
 }
 
 
@@ -211,5 +223,5 @@ function checkKeyUp(evt){
   if (evt.keyCode === KEY_DOWN)
     main_player.commands.down = false;
 
-  socket.emit('move', main_player.commands); 
+  socket.emit('move', main_player.commands);
 }
