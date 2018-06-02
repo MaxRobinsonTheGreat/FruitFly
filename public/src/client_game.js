@@ -12,6 +12,7 @@ main_player.sprite = new Sprite(image_container.get("Alien"));
 main_player.sprite.resizeBy(2);
 main_player.sprite.center(main_player.dimensions.l, main_player.dimensions.w);
 
+
 var others = [];
 
 var self_index = -1;
@@ -21,7 +22,7 @@ var delta_time = 0;
 
 var update_queue = [];
 var oldest_update;
-var update_delay = 100; //millis
+var update_delay = 75; //millis
 
 // set to true if you want to see the most recent server's version of the main players box
 var draw_self_debugger = false;
@@ -59,7 +60,7 @@ function Update(){
 
   updateOthers();
 
-  socket.emit('move', main_player.commands);
+  //socket.emit('move', main_player.location);
 }
 
 function updateDeltaTime() {
@@ -102,7 +103,7 @@ function updateOthers(){
 
   while(update_queue.length !== 0 && current_time-update_queue[0].timestamp >= update_delay){
     oldest_update = update_queue.shift();
-    //socket.emit('stop', main_player.location);
+    socket.emit('move', main_player.location);
   }
 }
 
@@ -208,7 +209,6 @@ function checkKeyDown(evt) {
     main_player.commands.up = true;
   if (evt.keyCode === KEY_DOWN)
     main_player.commands.down = true;
-  socket.emit('stop', main_player.location);
 }
 
 function checkKeyUp(evt){
@@ -221,6 +221,4 @@ function checkKeyUp(evt){
     main_player.commands.up = false;
   if (evt.keyCode === KEY_DOWN)
     main_player.commands.down = false;
-
-  socket.emit('stop', main_player.location);
 }

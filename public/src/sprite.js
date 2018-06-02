@@ -39,7 +39,6 @@ class Sprite{
 		this.rescaled_height = this.height;
 
 		if(this.resize_factor){
-			console.log(this.resize_factor);
 			this.resizeBy(this.resize_factor);
 		}
 		if(this.container){
@@ -72,7 +71,6 @@ class Sprite{
 		if(r < 0 || r >= this.rows) return;
 		this.cur_row = r;
 		this.srcY = this.cur_row * this.height;
-		//console.log(srcY);
 	}
 
 	updateFrame(){
