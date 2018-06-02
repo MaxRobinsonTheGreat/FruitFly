@@ -79,12 +79,7 @@ class Sprite{
 	setRow(r){
 		if(r < 0 || r >= this.rows) return;
 		this.cur_row = r;
-<<<<<<< HEAD
 		this.srcY = this.cur_row * this.frame_height;
-		//console.log(srcY);
-=======
-		this.srcY = this.cur_row * this.height;
->>>>>>> b853740dd360697627c47f54301b87f21d05b607
 	}
 
 	updateFrame(){
