@@ -62,7 +62,7 @@ class Sprite{
 		this.resize_factor = factor;
 	}
 
-	center(h, w){
+	center(h, w){ //...
 		this.Xoffset = w/2 - this.rescaled_width/2;
 		this.Yoffset = h/2 - this.rescaled_height/2;
 		this.container = {h, w};
