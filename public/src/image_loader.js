@@ -56,7 +56,7 @@ class ImageContainer{
 
 	imageLoaded(){
 		// is this the last image to load?
-		if(++this.loaded_image_counter <= images_info.length) return;
+		if(this.loaded_image_counter++ != images_info.length) return;
 		// at this point we know that all images have been loaded
 
 

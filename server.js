@@ -93,6 +93,7 @@ io.on('connection', function(new_client) {
 
     const forgiveness = 25; //this give the clients a *little* bit of leeway in their predictions
     let d_time = Date.now()-client.last_update+forgiveness;
+    client.last_update = Date.now();
 
     var server_location = clients.get(cur_name).player.location;
 
@@ -105,10 +106,10 @@ io.on('connection', function(new_client) {
 
     if(collision || x_dif > max_distance || y_dif > max_distance){
         client.connection.emit('correction', server_location);
+        client.last_update -= d_time;
     }
     else{
       client.player.location = predicted_location;
-      client.last_update = Date.now();
     }
   });
 

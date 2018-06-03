@@ -60,7 +60,7 @@ function Update(){
 
   updateOthers();
 
-  //socket.emit('move', main_player.location);
+  socket.emit('move', main_player.location);
 }
 
 function updateDeltaTime() {
@@ -103,7 +103,6 @@ function updateOthers(){
 
   while(update_queue.length !== 0 && current_time-update_queue[0].timestamp >= update_delay){
     oldest_update = update_queue.shift();
-    socket.emit('move', main_player.location);
   }
 }
 
