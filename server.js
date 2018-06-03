@@ -17,8 +17,6 @@ var io = require('socket.io')(server);
 var clients = new Map(); // contains socket connections and player objects
 var client_counter=0; //increments with every added client
 
-const margin_of_error = 1; //the client box prediction can be within 2 px of the server prediction
-
 // -- ROUTING --
 app.use(express.static(__dirname + '/node_modules'));
 app.use(express.static(__dirname + '/public'));
@@ -63,6 +61,7 @@ io.on('connection', function(new_client) {
   */
   new_client.on('init_client', function(new_player_loc){
     client.player = new game_core.Player();
+    client.last_update = Date.now();
 
     // keep incrementing x position until no longer colliding
     while(collided(client.player, cur_name)){
@@ -84,35 +83,32 @@ io.on('connection', function(new_client) {
 
 
   /* API 'move'
-     input: {left, right, up, down}
-      - updates the client's move data
-  */
-  new_client.on('move', function(commands){
-    if(!clients.has(cur_name)){return;} // this line defends against incoming requests after the client has already been disconnected
-    clients.get(cur_name).player.commands = commands;
-  });
-
-
-  /* API 'stop'
      input: {x, y}
       - updates the client's move data
       - checks if the clients prediction is too off
       - sends correction data to client if prediction is wrong
   */
-  new_client.on('stop', function(predicted_location){
-    if(!clients.has(cur_name)){return;} // see first line of 'move' request
+  new_client.on('move', function(predicted_location){
+    if(!clients.has(cur_name)){return;} // this line defends against incoming requests after the client has already been disconnected
 
-    // get the server's authoritative position
+    const forgiveness = 25; //this give the clients a *little* bit of leeway in their predictions
+    let d_time = Date.now()-client.last_update+forgiveness;
+
     var server_location = clients.get(cur_name).player.location;
 
-    // if the difference between the two is greater than the marigin of error send a correction
-    var xDif = Math.abs(server_location.x - predicted_location.x);
-    var yDif = Math.abs(server_location.y - predicted_location.y);
-    if(xDif > margin_of_error || yDif > margin_of_error){
+    let max_distance = (d_time/1000)*client.player.speed;
+
+    var x_dif = Math.abs(server_location.x - predicted_location.x);
+    var y_dif = Math.abs(server_location.y - predicted_location.y);
+
+    var collision = collided({dimensions: client.player.dimensions, location: predicted_location}, cur_name);
+
+    if(collision || x_dif > max_distance || y_dif > max_distance){
         client.connection.emit('correction', server_location);
     }
     else{
-      clients.get(cur_name).player.location = predicted_location;
+      client.player.location = predicted_location;
+      client.last_update = Date.now();
     }
   });
 
@@ -154,26 +150,6 @@ function init_physicsLoop(){
 function UpdateState(){
   delta_time = Date.now() - last_update;
   last_update = Date.now();
-
-  // this gross foreachloop stuff needs to be cleaned up by creating a client class
-  clients.forEach(function update(client, name, map){
-
-    // calculate the next move
-    // see if the next move collides with another box
-    var old_loc = client.player.move(delta_time);
-    var collision = collided(client.player, name);
-
-    if(collision){
-      // if there was a collision reset the players's location and tell the client
-      client.player.location = old_loc;
-      clients.get(name).connection.emit('correction', client.player.location);
-    }
-
-    // check for boundary collisions
-    var boundry_result = game_core.checkBoundry(client.player.location, client.player.dimensions);
-    client.player.location = boundry_result.loc;
-
-  });
 
   // send the update to each client if its been 45 milliseconds since the last update
   if(Date.now() - last_client_update >= client_update_waitTime){

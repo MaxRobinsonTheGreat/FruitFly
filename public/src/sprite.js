@@ -39,7 +39,6 @@ class Sprite{
 		this.rescaled_height = this.height;
 
 		if(this.resize_factor){
-			console.log(this.resize_factor);
 			this.resizeBy(this.resize_factor);
 		}
 		if(this.container){
