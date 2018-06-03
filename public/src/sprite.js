@@ -2,50 +2,41 @@
 
 class Sprite{
 
-	constructor(title, container){
-	 	let s = image_container.get(title);
+	constructor(s){
 		this.rows = s.rows;
 		this.cols = s.cols;
 		this.ctx = s.ctx;
 		this.wait_time = 1000/s.fps;
 		this.img = s.img;
 
-		// console.log(container);
-		let h = container.l;
-		let w = container.w;
-		this.container = {h,w};
-
 		this.cur_frame = 0;
 		this.cur_row = 0;
 		this.srcX = 0;
 		this.srcY = 0;
 		this.last_update_time = Date.now();
-		this.off_set_x = 0;
-		this.off_set_y = 0;
+		this.Xoffset = 0;
+		this.Yoffset = 0;
 
 		if(!this.img.complete){
 			image_container.outdated_sprites.push(this);
 		}
 		else{
-			this.frame_width = this.img.width/this.cols;
-			this.frame_height = this.img.height/this.rows;
+			this.width = this.img.width/this.cols;
+			this.height = this.img.height/this.rows;
 
-			this.width = this.frame_width;
-			this.height = this.frame_height;
-
-			this.center(this.container.h, this.container.w)
+			this.rescaled_width = this.width;
+			this.rescaled_height = this.height;
 		}
 	}
 
-	//finishes sprite processing if it wasn't loaded in the constructor
 	imageFinished(){
-		if(!this.frame_width){
-			this.frame_width = this.img.width/this.cols;
-			this.frame_height = this.img.height/this.rows;
+		if(!this.width){
+			this.width = this.img.width/this.cols;
+			this.height = this.img.height/this.rows;
 		}
 
-		this.width = this.frame_width;
-		this.height = this.frame_height;
+		this.rescaled_width = this.width;
+		this.rescaled_height = this.height;
 
 		if(this.resize_factor){
 			console.log(this.resize_factor);
@@ -59,28 +50,28 @@ class Sprite{
 
 
 	resizeTo(h, w){
-		this.width = w;
-		this.height = h;
+		this.rescaled_width = w;
+		this.rescaled_height = h;
 	}
 
 	resizeBy(factor){
-		this.width*=factor;
-		this.height*=factor;
-		Math.round(this.height);
-		Math.round(this.width);
+		this.rescaled_width*=factor;
+		this.rescaled_height*=factor;
+		Math.round(this.rescaled_height);
+		Math.round(this.rescaled_width);
 		this.resize_factor = factor;
 	}
 
 	center(h, w){
-		this.off_set_x = w/2 - this.width/2;
-		this.off_set_y = h/2 - this.height/2;
+		this.Xoffset = w/2 - this.rescaled_width/2;
+		this.Yoffset = h/2 - this.rescaled_height/2;
 		this.container = {h, w};
 	}
 
 	setRow(r){
 		if(r < 0 || r >= this.rows) return;
 		this.cur_row = r;
-		this.srcY = this.cur_row * this.frame_height;
+		this.srcY = this.cur_row * this.height;
 		//console.log(srcY);
 	}
 
@@ -95,28 +86,28 @@ class Sprite{
 		}
 
 		//Calculating the x coordinate for spritesheet
-		this.srcX = this.cur_frame * this.frame_width;
+		this.srcX = this.cur_frame * this.width;
 	}
 
-	draw(canvas_x, canvas_y){
+	draw(x, y){
 		if(!this.img.complete) return;
 
 		this.updateFrame();
 		ctx.drawImage(this.img,this.srcX,this.srcY,
-		this.frame_width,this.frame_height,
-		canvas_x+this.off_set_x,canvas_y+this.off_set_y,
-		this.width,this.height);
+		this.width,this.height,
+		x+this.Xoffset,y+this.Yoffset,
+		this.rescaled_width,this.rescaled_height);
 	}
 
-	drawStatic(canvas_x, canvas_y, r, c){
+	drawStatic(x, y, r, c){
 		if(!this.img.complete) return;
 
-		this.srcX = c * this.frame_width;
-		this.srcY = r * this.frame_height;
+		this.srcX = c * this.width;
+		this.srcY = r * this.height;
 
 		ctx.drawImage(this.img,this.srcX,this.srcY,
-		this.frame_width,this.frame_height,
-		canvas_x+this.off_set_x,canvas_y+this.off_set_y,
-		this.width,this.height);
+		this.width,this.height,
+		x+this.Xoffset,y+this.Yoffset,
+		this.rescaled_width,this.rescaled_height);
 	}
 }
