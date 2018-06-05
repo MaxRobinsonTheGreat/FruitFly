@@ -19,7 +19,7 @@ var delta_time = 0;
 
 var update_queue = [];
 var oldest_update;
-var update_delay = 75; //millis
+var update_delay = 100; //millis
 
 // set to true if you want to see the most recent server's version of the main players box
 var draw_self_debugger = false;
@@ -98,7 +98,7 @@ function updateOthers(){
   }
 
 
-  while(update_queue.length !== 0 && current_time-update_queue[0].timestamp >= update_delay){
+  while(update_queue.length > 1 && current_time-update_queue[0].timestamp >= update_delay){
     oldest_update = update_queue.shift();
     socket.emit('move', main_player.location);
   }
