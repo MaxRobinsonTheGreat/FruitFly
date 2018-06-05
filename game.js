@@ -96,7 +96,7 @@ module.exports = class Game{
     var collision = this.collided({dimensions: client.player.dimensions, location: predicted_location}, name);
 
     if(collision || x_dif > max_distance || y_dif > max_distance){
-        console.log("correction");
+        client.connection.emit('correction', server_location);
     }
     else{
       client.player.location = predicted_location;
