@@ -8,10 +8,7 @@ var interval;
 var FPS = 60;
 
 var main_player = new game_core.Player();
-main_player.sprite = new Sprite(image_container.get("Alien"));
-main_player.sprite.resizeBy(2);
-main_player.sprite.center(main_player.dimensions.l, main_player.dimensions.w);
-
+main_player.sprite = new Sprite("Alien", main_player.dimensions, 2);
 
 var others = [];
 
@@ -60,7 +57,7 @@ function Update(){
 
   updateOthers();
 
-  socket.emit('move', main_player.location);
+  //socket.emit('move', main_player.location);
 }
 
 function updateDeltaTime() {
@@ -103,6 +100,7 @@ function updateOthers(){
 
   while(update_queue.length !== 0 && current_time-update_queue[0].timestamp >= update_delay){
     oldest_update = update_queue.shift();
+    socket.emit('move', main_player.location);
   }
 }
 
@@ -133,9 +131,8 @@ function setState(state){
         dimensions: game_core.getDimensionsObj(100, 50),
       });
 
-      var s = new Sprite(image_container.get("Person"));
-      s.resizeBy(.5);
-      s.center(others[i].dimensions.l, others[i].dimensions.w);
+      var s = new Sprite("Person", others[i].dimensions, .5);
+
       others[i].sprite = s;
     }
   }
