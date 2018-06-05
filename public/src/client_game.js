@@ -9,6 +9,7 @@ var FPS = 60;
 
 var main_player = new game_core.Player();
 main_player.sprite = new Sprite("Alien", main_player.dimensions, 2);
+main_player.speed = 100;
 
 var others = [];
 
@@ -57,7 +58,7 @@ function Update(){
 
   updateOthers();
 
-  //socket.emit('move', main_player.location);
+  socket.emit('move', main_player.location);
 }
 
 function updateDeltaTime() {
@@ -98,9 +99,8 @@ function updateOthers(){
   }
 
 
-  while(update_queue.length > 1 && current_time-update_queue[0].timestamp >= update_delay){
+  while(update_queue.length > 0 && current_time-update_queue[0].timestamp >= update_delay){
     oldest_update = update_queue.shift();
-    socket.emit('move', main_player.location);
   }
 }
 

@@ -82,9 +82,10 @@ module.exports = class Game{
   movePlayer(name, predicted_location){
     let client = this.clients.get(name);
 
-    const forgiveness = 15; //this give the clients a *little* bit of leeway in their predictions
+    const forgiveness = 5; //this give the clients a *little* bit of leeway in their predictions
     let d_time = Date.now()-client.player.last_update+forgiveness;
-    let new_date = Date.now();
+    let new_time = Date.now();
+    if(d_time < 0) return;
 
     var server_location = this.clients.get(name).player.location;
 
@@ -100,7 +101,7 @@ module.exports = class Game{
     }
     else{
       client.player.location = predicted_location;
-      client.player.last_update = new_date;
+      client.player.last_update = new_time;
     }
   }
 }

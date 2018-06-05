@@ -34,13 +34,10 @@ class Sprite{
 
 			this.width = this.frame_width;
 			this.height = this.frame_height;
-			console.log(s.title);
 			if(this.resize_factor) {
 				this.resizeBy(this.resize_factor);
 			}
 			this.center();
-			console.log("Container Height: " + this.height);
-			console.log("Container Width: " + this.width);
 		}
 	}
 
@@ -86,7 +83,6 @@ class Sprite{
 		if(r < 0 || r >= this.rows) return;
 		this.cur_row = r;
 		this.srcY = this.cur_row * this.frame_height;
-		//console.log(srcY);
 	}
 
 	updateFrame(){
