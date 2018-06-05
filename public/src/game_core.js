@@ -26,6 +26,7 @@
         this.dimensions = {l:100, w:50};
         this.commands = {left: false, right: false, up: false, down: false};
         this.speed = 100; //pixels per second
+        this.last_update = Date.now();
       }
 
       move(time){
