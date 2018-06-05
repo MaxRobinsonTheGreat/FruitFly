@@ -2,12 +2,8 @@
 
 'use strict';
 
-// Use the game core module
-//const game_core = require("./public/src/game_core");
 const Logger = require("./logger");
 const Game = require("./game");
-
-//Logger.log("SERVER: " + game_core.connection());
 
 // Use express to open a web server
 var express = require('express');
@@ -50,10 +46,6 @@ io.on('connection', function(new_client) {
   var client = new Client(new_client);
 
   Logger.log('Client ' + cur_name + ' connected.');
-
-  new_client.on('join', function(data) {
-  });
-
 
   /* API 'init_client'
      input: {x, y}

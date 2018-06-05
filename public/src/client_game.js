@@ -9,7 +9,6 @@ var FPS = 60;
 
 var main_player = new game_core.Player();
 main_player.sprite = new Sprite("Alien", main_player.dimensions, 2);
-main_player.speed = 100;
 
 var others = [];
 
@@ -29,7 +28,6 @@ var draw_self_debugger = false;
 var socket = io.connect();
 
 socket.on('connect', function(data) {
-   socket.emit('join', 'Hello World from client');
    main();
 });
 
