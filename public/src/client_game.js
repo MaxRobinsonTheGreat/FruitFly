@@ -175,7 +175,6 @@ socket.on('correction', function(pack){
 
   main_player.location = pack.corrected_location;
   update_counter++;
-  console.log(update_counter);
 });
 
 
