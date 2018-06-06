@@ -10,8 +10,6 @@
 */
 (function(exports){
 
-    var rad2deg = 180/Math.PI;
-
     exports.getLocationObj = function(x, y){
       return {x, y};
     }
@@ -52,11 +50,28 @@
       setOrientation(mouse_x, mouse_y){
         this.center = this.getCenter();
 
-        let a = mouse_x - this.center.x;
-        let o = mouse_y - this.center.y;
+        let adjacent = mouse_x - this.center.x;
+        let opposite = mouse_y - this.center.y;
 
-        if (a === 0) return;
-        this.orientation = Math.atan(o/a) * rad2deg;
+        let rad2deg = 180/Math.PI;
+        if (adjacent === 0) {
+          return;
+        }
+        else if (adjacent > 0 && opposite < 0) { //First Quadrant
+          let orientation = Math.atan(-opposite/-adjacent) * rad2deg;
+          this.orientation = orientation + 360;
+        }
+        else if (adjacent > 0 && opposite > 0) { //Second Quadrant
+          this.orientation = Math.atan(opposite/adjacent) * rad2deg;
+        }
+        else if (adjacent < 0 && opposite > 0) { //Third Quadrant
+          let orientation = Math.atan(opposite/adjacent) * rad2deg;
+          this.orientation = orientation + 180;
+        }
+        else if (adjacent < 0 && opposite < 0) { //Fourth Quadrant
+          let orientation = Math.atan(opposite/adjacent) * rad2deg;
+          this.orientation = orientation + 180;
+        }
       }
     }
 
