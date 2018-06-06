@@ -56,7 +56,10 @@ io.on('connection', function(new_client) {
   new_client.on('init_client', function(new_player_loc){
     game.addClient(client, cur_name, new_player_loc);
 
-    if(game.clients.size >= 0 && !game.isRunning()) {game.start();}
+    if(game.clients.size >= 0 && !game.isRunning()) {
+      game.start();
+      Logger.log("SERVER: Game \'" + game.name + "\' started." );
+    }
   });
 
 
@@ -84,7 +87,7 @@ io.on('connection', function(new_client) {
 
     if(clients.size === 0){
         game.stop();
-        Logger.log("SERVER: No remaining clients. Physics loop shut down.");
+        Logger.log("SERVER: Game \'" + game.name + "\' shut down." );
     }
   });
 });

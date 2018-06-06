@@ -10,6 +10,8 @@
 */
 (function(exports){
 
+    var rad2deg = 180/Math.PI;
+
     exports.getLocationObj = function(x, y){
       return {x, y};
     }
@@ -24,9 +26,17 @@
       constructor() {
         this.location = {x:20, y:20};
         this.dimensions = {l:100, w:50};
+        this.center = this.getCenter();
         this.commands = {left: false, right: false, up: false, down: false};
         this.speed = 100; //pixels per second
         this.last_update = Date.now();
+        this.orientation = 0; // TODO: make it function like so: 0 - 359 degrees, 0 degrees points straight up
+      }
+
+      getCenter(){
+        let x = this.location.x + this.dimensions.w / 2;
+        let y = this.location.y + this.dimensions.l / 2;
+        return {x, y}
       }
 
       move(time){
@@ -37,6 +47,16 @@
         if(this.commands.up) this.location.y-=dist;
         if(this.commands.down) this.location.y+=dist;
         return(old_loc);
+      }
+
+      setOrientation(mouse_x, mouse_y){
+        this.center = this.getCenter();
+
+        let a = mouse_x - this.center.x;
+        let o = mouse_y - this.center.y;
+
+        if (a === 0) return;
+        this.orientation = Math.atan(o/a) * rad2deg;
       }
     }
 

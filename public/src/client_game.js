@@ -2,10 +2,13 @@
 
 'use strict';
 
+var canvas;
 var ctx;
 var interval;
 
 var FPS = 60;
+var mouse_x = 0;
+var mouse_y = 0;
 
 var main_player = new game_core.Player();
 main_player.sprite = new Sprite("Alien", main_player.dimensions, 2);
@@ -35,7 +38,8 @@ function intializeCanvasControls() {
   document.addEventListener('keydown', checkKeyDown);
 	document.addEventListener('keyup', checkKeyUp);
 
-  ctx = document.getElementById('canvas').getContext("2d");
+  canvas = document.getElementById('canvas');
+  ctx = canvas.getContext("2d");
 }
 
 function main(){
@@ -73,6 +77,8 @@ function updatePlayerPosition() {
 
   var boundry_result = game_core.checkBoundry(main_player.location, main_player.dimensions);
   main_player.location = boundry_result.loc;
+
+  main_player.setOrientation(mouse_x, mouse_y);
 }
 
 function updateOthers(){
@@ -182,6 +188,10 @@ function Draw(){
        others[i].sprite.draw(others[i].location.x, others[i].location.y);
     }
   }
+  ctx.beginPath();
+  ctx.moveTo(main_player.center.x, main_player.center.y);
+  ctx.lineTo(mouse_x, mouse_y);
+  ctx.stroke();
 }
 function drawBox(box, color){
   ctx.fillStyle = color;
@@ -216,3 +226,9 @@ function checkKeyUp(evt){
   if (evt.keyCode === KEY_DOWN)
     main_player.commands.down = false;
 }
+
+$("body").mousemove(function(e) {
+  var rect = canvas.getBoundingClientRect();
+  mouse_x = e.clientX - rect.left;
+  mouse_y = e.clientY - rect.top;
+});
