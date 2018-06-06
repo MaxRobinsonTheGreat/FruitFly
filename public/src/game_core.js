@@ -28,7 +28,7 @@
         this.commands = {left: false, right: false, up: false, down: false};
         this.speed = 100; //pixels per second
         this.last_update = Date.now();
-        this.orientation = 0; // TODO: make it function like so: 0 - 359 degrees, 0 degrees points straight up
+        this.orientation = 0;
       }
 
       getCenter(){
