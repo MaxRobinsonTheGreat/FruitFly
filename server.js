@@ -57,8 +57,10 @@ io.on('connection', function(new_client) {
     game.addClient(client, cur_name, new_player_loc);
 
     if(game.clients.size >= 0 && !game.isRunning()) {
-      game.start();
-      Logger.log("SERVER: Game \'" + game.name + "\' started." );
+      try{
+        game.start();
+        Logger.log("SERVER: Game \'" + game.name + "\' started." );
+      }catch(e){}
     }
   });
 
@@ -71,7 +73,7 @@ io.on('connection', function(new_client) {
   */
   new_client.on('move', function(pack){
     if(!clients.has(cur_name)){return;}
-    game.movePlayer(cur_name, pack);
+    try{game.movePlayer(cur_name, pack);}catch(e){}
   });
 
   /* API 'disconnect'
@@ -79,7 +81,7 @@ io.on('connection', function(new_client) {
       - removes the client data from the clients and clientbodies map
       - shuts down the physics loop if this was the last client to leave
   */
-  new_client.on('disconnect', function(data){
+  new_client.on('disconnect', function(){
 
     game.removeClient(cur_name);
 
