@@ -69,9 +69,9 @@ io.on('connection', function(new_client) {
       - checks if the clients prediction is too off
       - sends correction data to client if prediction is wrong
   */
-  new_client.on('move', function(predicted_location){
+  new_client.on('move', function(pack){
     if(!clients.has(cur_name)){return;}
-    game.movePlayer(cur_name, predicted_location);
+    game.movePlayer(cur_name, pack);
   });
 
   /* API 'disconnect'

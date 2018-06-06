@@ -79,7 +79,9 @@ module.exports = class Game{
     this.clients.delete(name);
   }
 
-  movePlayer(name, predicted_location){
+  movePlayer(name, pack){
+    let predicted_location = pack.loc;
+
     let client = this.clients.get(name);
 
     const forgiveness = 5; //this give the clients a *little* bit of leeway in their predictions
@@ -97,7 +99,7 @@ module.exports = class Game{
     var collision = this.collided({dimensions: client.player.dimensions, location: predicted_location}, name);
 
     if(collision || x_dif > max_distance || y_dif > max_distance){
-        client.connection.emit('correction', server_location);
+        client.connection.emit('correction', {corrected_location: server_location, n: pack.n});
     }
     else{
       client.player.location = predicted_location;
