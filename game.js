@@ -13,7 +13,7 @@ module.exports = class Game{
   }
 
   start(){
-    this.physics_loop = setInterval(function(){this.updateState();}.bind(this), 1000/this.fps);
+    this.physics_loop = setInterval(function(){this.updateState();}.bind(this), this.fps);
     this.runnning = true;
   }
 
@@ -61,6 +61,7 @@ module.exports = class Game{
 
   addClient(client, client_name, location){
     client.player = new game_core.Player();
+    client.player.correction_counter = 0;
 
     // keep incrementing x position until no longer colliding
     while(this.collided(client.player, client_name)){
@@ -80,9 +81,11 @@ module.exports = class Game{
   }
 
   movePlayer(name, pack){
-    let predicted_location = pack.loc;
-
     let client = this.clients.get(name);
+
+    if(pack.n !== client.player.correction_counter) return;
+
+    let predicted_location = pack.loc;
 
     const forgiveness = 9; //this give the clients a *little* bit of leeway in their predictions
     let d_time = Date.now()-client.player.last_update+forgiveness;
@@ -99,7 +102,8 @@ module.exports = class Game{
     var collision = this.collided({dimensions: client.player.dimensions, location: predicted_location}, name);
 
     if(collision || x_dif > max_distance || y_dif > max_distance){
-        client.connection.emit('correction', {corrected_location: server_location, n: pack.n});
+      client.player.correction_counter++;
+      client.connection.emit('correction', {corrected_location: server_location, n: pack.n});
     }
     else{
       client.player.location = predicted_location;

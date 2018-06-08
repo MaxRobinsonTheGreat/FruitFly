@@ -4,7 +4,7 @@ var images_info =
 [
 	{
 		title: "Alien",
-		src: "img/Alien.png",
+		src: "Alien.png",
 		type: "sprite",
 		rows: 4,
 		cols: 4,
@@ -12,7 +12,7 @@ var images_info =
 	},
 	{
 		title: "Person",
-		src: "img/character.png",
+		src: "character.png",
 		type: "sprite",
 		rows: 2,
 		cols: 8,
@@ -20,7 +20,7 @@ var images_info =
 	},
 	{
 		title: "Pixels",
-		src: "img/movers.png",
+		src: "movers.png",
 		type: "sprite",
 		rows: 3,
 		cols: 2,
@@ -46,7 +46,7 @@ class ImageContainer{
 				this.imageLoaded();
 			}
 
-			img.src = info.src;
+			img.src = "./img/" + info.src;
 			info.img = img;
 
 			this.image_map.set(info.title, info);
