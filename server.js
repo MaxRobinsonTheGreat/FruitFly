@@ -7,6 +7,7 @@ const Game = require("./game");
 
 // Use express to open a web server
 var express = require('express');
+var bodyParser = require('body-parser');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
@@ -16,15 +17,17 @@ var client_counter=0; //increments with every added client
 
 var game = new Game("only_game", clients);//Object.assign({}, clients));
 
-// -- ROUTING --
 app.use(express.static(__dirname + '/node_modules'));
 app.use(express.static(__dirname + '/public'));
+app.use(bodyParser.urlencoded({extended:true}));
+
+// -- ROUTING --
 app.get('/', function(req, res, next) {
-    res.sendFile(__dirname + '/public/html/index.html');
+    res.sendFile(__dirname + '/public/html/login-page.html');
 });
-app.post('/user', function(req, res, next) {
-    // console.log(req.body); //this is still undefined
-    res.sendFile(__dirname + '/html/index.html');
+app.post('/login', function(req, res, next) {
+    let body = req.body;
+    res.sendFile(__dirname + '/public/html/index.html');
 });
 
 
@@ -37,7 +40,7 @@ class Client {
 // -- ClIENT LISTENERS --
 server.listen(4200, '0.0.0.0'); // begin listening
 Logger.log("SERVER: listening...");
-
+// io.set('transports', ['websocket']);
 io.on('connection', function(new_client) {
   var cur_name = (client_counter++)+"";
     /* The client counter increments with every added client, but does not decrement when a client leaves.
