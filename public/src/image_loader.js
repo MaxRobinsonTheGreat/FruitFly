@@ -59,7 +59,6 @@ class ImageContainer{
 		if(this.loaded_image_counter++ != images_info.length) return;
 		// at this point we know that all images have been loaded
 
-
 		this.updateSprites();
 	}
 
