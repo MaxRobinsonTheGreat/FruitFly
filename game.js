@@ -87,9 +87,11 @@ module.exports = class Game{
 
     let predicted_location = pack.loc;
 
-    const forgiveness = 9; //this give the clients a *little* bit of leeway in their predictions
+    const forgiveness = 0; //this give the clients a *little* bit of leeway in their predictions
     let d_time = Date.now()-client.player.last_update+forgiveness;
-    let new_time = Date.now();
+    let old_time = client.player.last_update;
+    client.player.last_update = Date.now();
+
     if(d_time < 0) return;
 
     var server_location = this.clients.get(name).player.location;
@@ -102,12 +104,13 @@ module.exports = class Game{
     var collision = this.collided({dimensions: client.player.dimensions, location: predicted_location}, name);
 
     if(collision || x_dif > max_distance || y_dif > max_distance){
+      client.player.last_update = old_time;
       client.player.correction_counter++;
       client.connection.emit('correction', {corrected_location: server_location, n: pack.n});
+      console.log();
     }
     else{
       client.player.location = predicted_location;
-      client.player.last_update = new_time;
     }
   }
 }
