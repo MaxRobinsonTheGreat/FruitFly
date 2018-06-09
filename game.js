@@ -1,6 +1,7 @@
 'use strict'
 
 const game_core = require("./public/src/game_core");
+const logger = require("./logger")
 
 module.exports = class Game{
   constructor(name, clients){
@@ -87,11 +88,10 @@ module.exports = class Game{
 
     let predicted_location = pack.loc;
 
-    const forgiveness = 10; //this give the clients a *little* bit of leeway in their predictions
+    const forgiveness = 0;//should be 10 //this give the clients a *little* bit of leeway in their predictions
     let d_time = Date.now()-client.player.last_update+forgiveness;
     let old_time = client.player.last_update;
     client.player.last_update = Date.now();
-
     if(d_time < 0) return;
 
     var server_location = this.clients.get(name).player.location;

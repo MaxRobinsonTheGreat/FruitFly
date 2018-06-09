@@ -36,3 +36,12 @@ exports.log = function(message){
 
   console.log(date_string+"| "+message);
 }
+
+
+exports.deltaTime = function(delta_time){
+  this.log("Delta Time: " + delta_time);
+}
+
+exports.locations = function(locations){
+  this.log("Locations: " + locations);
+}
