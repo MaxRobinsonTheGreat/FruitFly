@@ -23,7 +23,7 @@ var delta_time = 0;
 var update_queue = [];
 var oldest_update;
 var update_delay = 100; //millis
-var update_counter = 0;
+var correction_counter = 0;
 
 // set to true if you want to see the most recent server's version of the main players box
 var draw_self_debugger = false;
@@ -61,7 +61,7 @@ function Update(){
 
   updateOthers();
 
-  socket.emit('move', {loc: main_player.location, n: update_counter});
+  socket.emit('move', {loc: main_player.location, cc: correction_counter});
 }
 
 function updateDeltaTime() {
@@ -171,10 +171,10 @@ socket.on('all', function(state) {
     - pushes the new state into the update queue
 */
 socket.on('correction', function(pack){
-  if(pack.n !== update_counter) return;
+  if(pack.cc !== correction_counter) return;
 
   main_player.location = pack.corrected_location;
-  update_counter++;
+  correction_counter++;
 });
 
 
@@ -184,7 +184,7 @@ function Draw(){
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
 	drawBox(main_player, "blue");
-  main_player.sprite.draw(main_player.location.x, main_player.location.y);
+  main_player.sprite.drawDirectional(main_player.location.x, main_player.location.y, main_player.orientation);
 
   for(var i in others){
     if (i != self_index || draw_self_debugger && i < others.length){

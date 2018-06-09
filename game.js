@@ -83,7 +83,7 @@ module.exports = class Game{
   movePlayer(name, pack){
     let client = this.clients.get(name);
 
-    if(pack.n !== client.player.correction_counter) return;
+    if(pack.cc !== client.player.correction_counter) return;
 
     let predicted_location = pack.loc;
 
@@ -106,7 +106,7 @@ module.exports = class Game{
     if(collision || x_dif > max_distance || y_dif > max_distance){
       client.player.last_update = old_time;
       client.player.correction_counter++;
-      client.connection.emit('correction', {corrected_location: server_location, n: pack.n});
+      client.connection.emit('correction', {corrected_location: server_location, cc: pack.cc});
     }
     else{
       client.player.location = predicted_location;

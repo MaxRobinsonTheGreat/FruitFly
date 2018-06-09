@@ -99,6 +99,19 @@ class Sprite{
 		this.srcX = this.cur_frame * this.frame_width;
 	}
 
+	drawDirectional(x, y, theta){
+
+		if(theta >= 315 || theta <= 45)
+			this.setRow(2); //right
+		else if(theta > 45 && theta <= 135)
+			this.setRow(0); //down
+		else if(theta > 135 && theta <= 225)
+			this.setRow(1); //left
+		else
+			this.setRow(3); //up
+		this.draw(x, y);
+	}
+
 	draw(x, y){
 		if(!this.img.complete) return;
 
