@@ -29,7 +29,7 @@ var update_counter = 0;
 var draw_self_debugger = false;
 
 // connects at the ip addess and port of the page
-var socket = io({transports: ['websocket'], upgrade: false});
+var socket = io.connect();
 
 socket.on('connect', function(data) {
    main();

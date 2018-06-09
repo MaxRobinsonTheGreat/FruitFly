@@ -87,7 +87,7 @@ module.exports = class Game{
 
     let predicted_location = pack.loc;
 
-    const forgiveness = 0; //this give the clients a *little* bit of leeway in their predictions
+    const forgiveness = 10; //this give the clients a *little* bit of leeway in their predictions
     let d_time = Date.now()-client.player.last_update+forgiveness;
     let old_time = client.player.last_update;
     client.player.last_update = Date.now();
@@ -107,7 +107,6 @@ module.exports = class Game{
       client.player.last_update = old_time;
       client.player.correction_counter++;
       client.connection.emit('correction', {corrected_location: server_location, n: pack.n});
-      console.log();
     }
     else{
       client.player.location = predicted_location;
