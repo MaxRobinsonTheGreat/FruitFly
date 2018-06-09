@@ -4,6 +4,7 @@
 
 const Logger = require("./logger");
 const Game = require("./game");
+const Client = require("./client")
 
 // Use express to open a web server
 var express = require('express');
@@ -29,13 +30,6 @@ app.post('/login', function(req, res, next) {
     let body = req.body;
     res.sendFile(__dirname + '/public/html/index.html');
 });
-
-
-class Client {
-  constructor(connection) {
-    this.connection = connection;
-  }
-}
 
 // -- ClIENT LISTENERS --
 server.listen(4200, '0.0.0.0'); // begin listening
