@@ -59,7 +59,7 @@ io.on('connection', function(new_client) {
   new_client.on('init_client', function(new_player_loc){
     game.addClient(client, cur_name, new_player_loc);
 
-    if(game.clients.size >= 0 && !game.isRunning()) {
+    if(clients.size <= 1 && !game.isRunning()) {
       try{
         game.start();
         Logger.log("SERVER: Game \'" + game.name + "\' started." );
