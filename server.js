@@ -50,7 +50,7 @@ io.on('connection', function(new_client) {
       - initializes the client and clientbodies objects and puts into maps
       - restarts physics loop when the client is added to an empty client map
   */
-  client.connection.on('init_client', function(new_player_loc){
+  client.on('init_client', function(new_player_loc){
     game.addClient(client, cur_name, new_player_loc);
 
     if(clients.size <= 1 && !game.isRunning()) {
@@ -68,7 +68,7 @@ io.on('connection', function(new_client) {
       - checks if the clients prediction is too off
       - sends correction data to client if prediction is wrong
   */
-  client.connection.on('move', function(pack){
+  client.on('move', function(pack){
     if(!clients.has(cur_name)){return;}
     try{game.movePlayer(cur_name, pack);}catch(e){}
   });
@@ -78,7 +78,7 @@ io.on('connection', function(new_client) {
       - removes the client data from the clients and clientbodies map
       - shuts down the physics loop if this was the last client to leave
   */
-  client.connection.on('disconnect', function(){
+  client.on('disconnect', function(){
 
     game.removeClient(cur_name);
 
