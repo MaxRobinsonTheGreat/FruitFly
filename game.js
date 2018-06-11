@@ -40,7 +40,7 @@ module.exports = class Game{
       if(name != ignore_name){
         if(game_core.intersect(r, client.player)){
           result = true;
-          return;
+          return; //why aren't we returning the result?
         }
       }
     });
@@ -54,9 +54,10 @@ module.exports = class Game{
       locations.push(client.player.location);
     });
 
+    //why isn't this in the getLocations function?
     var self_index = 0;
     this.clients.forEach(function update(client, name, map){
-      client.connection.emit('all', {locations, self_index: self_index++});
+      client.sendToAll({locations, self_index: self_index++});
     });
   }
 
@@ -70,7 +71,7 @@ module.exports = class Game{
     }
 
     if(client.player.location.x !== location.x){
-      client.connection.emit('correction', client.player.location);
+      client.sendCorrection(client.player.location);
     }
 
     // put client info in map
@@ -106,7 +107,7 @@ module.exports = class Game{
     if(collision || x_dif > max_distance || y_dif > max_distance){
       client.player.last_update = old_time;
       client.player.correction_counter++;
-      client.connection.emit('correction', {corrected_location: server_location, cc: pack.cc});
+      client.sendCorrection({corrected_location: server_location, cc: pack.cc});
     }
     else{
       client.player.location = predicted_location;

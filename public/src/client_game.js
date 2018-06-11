@@ -2,7 +2,7 @@
 
 'use strict';
 
-var canvas;
+var canvas = document.getElementById('canvas');
 var ctx;
 var interval;
 
@@ -39,7 +39,6 @@ function intializeCanvasControls() {
   document.addEventListener('keydown', checkKeyDown);
 	document.addEventListener('keyup', checkKeyUp);
 
-  canvas = document.getElementById('canvas');
   ctx = canvas.getContext("2d");
 }
 

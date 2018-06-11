@@ -20,6 +20,7 @@
       return {left: false, right: false, up: false, down: false};
     }
 
+    //should we make player its own export?
     exports.Player = class {
       constructor() {
         this.location = {x:20, y:20};
@@ -84,11 +85,11 @@
       return {loc, was_correction};
     }
 
-    var check_intersect = exports.intersect = function(rect1, rect2){
-      let loc1 = rect1.location;
-      let dim1 = rect1.dimensions;
-      let loc2 = rect2.location;
-      let dim2 = rect2.dimensions;
+    var check_intersect = exports.intersect = function(obj1, obj2){
+      let loc1 = obj1.location;
+      let dim1 = obj1.dimensions;
+      let loc2 = obj2.location;
+      let dim2 = obj2.dimensions;
 
       return (loc1.x+dim1.w > loc2.x && loc1.x < loc2.x+dim2.w &&
               loc1.y+dim1.l > loc2.y && loc1.y < loc2.y+dim2.l)
