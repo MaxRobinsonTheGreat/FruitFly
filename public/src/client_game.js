@@ -205,7 +205,7 @@ function drawBox(box, color){
 
 
 //      --- CONTROL LISTENERS ---
-var KEY_UP=38, KEY_DOWN=40, KEY_LEFT=37, KEY_RIGHT=39;
+const KEY_UP=87, KEY_DOWN=83, KEY_LEFT=65, KEY_RIGHT=68;
 function checkKeyDown(evt) {
   evt.preventDefault();
   if (evt.keyCode === KEY_LEFT)
