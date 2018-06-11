@@ -89,7 +89,7 @@ module.exports = class Game{
 
     let predicted_location = pack.loc;
 
-    const forgiveness = 0;//should be 10 //this give the clients a *little* bit of leeway in their predictions
+    const forgiveness = 16;//should be 10 //this give the clients a *little* bit of leeway in their predictions
     let d_time = Date.now()-client.player.last_update+forgiveness;
     let old_time = client.player.last_update;
     client.player.last_update = Date.now();
