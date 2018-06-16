@@ -2,6 +2,7 @@
 
 const game_core = require("./public/src/game_core");
 const logger = require("./logger")
+const Player = require("./public/src/player")
 
 module.exports = class Game{
   constructor(name, clients){
@@ -38,7 +39,7 @@ module.exports = class Game{
     var result = false;
     this.clients.forEach(function update(client, name, map){
       if(name != ignore_name){
-        if(game_core.intersect(r, client.player)){
+        if(game_core.checkIntersect(r, client.player)){
           result = true;
           return; //why aren't we returning the result?
         }
@@ -62,7 +63,7 @@ module.exports = class Game{
   }
 
   addClient(client, client_name, location){
-    client.player = new game_core.Player();
+    client.player = new Player();
     client.player.correction_counter = 0;
 
     // keep incrementing x position until no longer colliding

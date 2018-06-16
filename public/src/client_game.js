@@ -1,16 +1,18 @@
 //client_game.js
-
 'use strict';
 
-var canvas = document.getElementById('canvas');
-var ctx;
+const game_core = require('./game_core');
+const Sprite = require('./sprite');
+const Player = require('./player');
+const image_container = require('./image_container').getImageContainer();
+
 var interval;
 
 var FPS = 60;
 var mouse_x = 0;
 var mouse_y = 0;
 
-var main_player = new game_core.Player();
+var main_player = new Player();
 main_player.sprite = new Sprite("Alien", main_player.dimensions, 2);
 
 var others = [];
@@ -38,8 +40,6 @@ socket.on('connect', function(data) {
 function intializeCanvasControls() {
   document.addEventListener('keydown', checkKeyDown);
 	document.addEventListener('keyup', checkKeyUp);
-
-  ctx = canvas.getContext("2d");
 }
 
 function main(){

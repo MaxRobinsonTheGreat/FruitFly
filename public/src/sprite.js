@@ -1,6 +1,8 @@
 'use strict'
 
-class Sprite{
+const image_container = require('./image_container');
+
+module.exports = class {
 
 	constructor(title, container, resize_factor){
 		let s = image_container.get(title);
@@ -26,7 +28,7 @@ class Sprite{
 		this.off_set_y = 0;
 
 		if(!this.img.complete){
-			image_container.outdated_sprites.push(this);
+			image_container.pushOutDated(this);
 		}
 		else{
 			this.frame_width = this.img.width/this.cols;
