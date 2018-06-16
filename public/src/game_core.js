@@ -44,7 +44,7 @@ module.exports = {
 
   anyIntersect: function(primary, list, to_ignore) {
       for(i in list){
-        if(i!=to_ignore && checkIntersect(primary, list[i])){
+        if(i!=to_ignore && this.checkIntersect(primary, list[i])){
           return true;
         }
       }
