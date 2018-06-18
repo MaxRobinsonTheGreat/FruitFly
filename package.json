@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
-    "test": "echo 'Thomas is awesome!!!'"
+    "test": "echo 'Thomas is awesome!!!'",
+    "start": "node server.js &>> ../Log/log1.txt"
   },
   "author": "",
   "license": "ISC",
