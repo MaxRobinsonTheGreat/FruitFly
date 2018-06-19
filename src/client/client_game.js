@@ -199,7 +199,7 @@ function Draw(){
 function drawBox(box, color){
   ctx.fillStyle = color;
   ctx.fillRect(box.location.x, box.location.y,
-               box.dimensions.w, box.dimensions.l);
+               box.dimensions.w, box.dimensions.h);
 }
 
 

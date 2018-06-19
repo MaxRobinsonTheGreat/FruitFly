@@ -1,7 +1,7 @@
 module.exports = class {
   constructor() {
     this.location = {x:20, y:20};
-    this.dimensions = {l:100, w:50};
+    this.dimensions = {h:100, w:50};
     this.center = this.getCenter();
     this.commands = {left: false, right: false, up: false, down: false};
     this.speed = 100; //pixels per second
@@ -11,7 +11,7 @@ module.exports = class {
 
   getCenter(){
     let x = this.location.x + this.dimensions.w / 2;
-    let y = this.location.y + this.dimensions.l / 2;
+    let y = this.location.y + this.dimensions.h / 2;
     return {x, y}
   }
 

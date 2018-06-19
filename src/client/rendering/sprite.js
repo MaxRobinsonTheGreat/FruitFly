@@ -7,9 +7,7 @@ module.exports = class {
 	constructor(title, container, resize_factor){
 		let s = image_container.get(title);
 
-		let h = container.l;
-		let w = container.w;
-		this.container = {h, w};
+		this.container = container;
 
 		this.resize_factor = resize_factor;
 

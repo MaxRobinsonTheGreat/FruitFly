@@ -15,8 +15,8 @@ module.exports = {
   getLocationObj: function(x, y) {
     return {x, y};
   },
-  getDimensionsObj: function(l, w) {
-    return {l, w};
+  getDimensionsObj: function(h, w) {
+    return {h, w};
   },
   getCommandsObj: function(){
     return {left: false, right: false, up: false, down: false};
@@ -25,7 +25,7 @@ module.exports = {
   checkBoundry: function(loc, dim){
     var was_correction = false;
     if(loc.x + dim.w > 600) {loc.x = 600-dim.w;was_correction = true}
-    if(loc.y + dim.l > 400) {loc.y = 400-dim.l;was_correction = true}
+    if(loc.y + dim.h > 400) {loc.y = 400-dim.h;was_correction = true}
     if(loc.x < 0) {loc.x = 0;was_correction = true}
     if(loc.y < 0) {loc.y = 0;was_correction = true}
     return {loc, was_correction};
@@ -38,7 +38,7 @@ module.exports = {
     let dim2 = obj2.dimensions;
 
     return (loc1.x+dim1.w > loc2.x && loc1.x < loc2.x+dim2.w &&
-            loc1.y+dim1.l > loc2.y && loc1.y < loc2.y+dim2.l)
+            loc1.y+dim1.h > loc2.y && loc1.y < loc2.y+dim2.h)
   },
 
 
