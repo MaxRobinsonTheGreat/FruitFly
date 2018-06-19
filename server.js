@@ -2,9 +2,9 @@
 
 'use strict';
 
-const Logger = require("./logger");
-const Game = require("./game");
-const Client = require("./client")
+const Logger = require("./src/server/logger");
+const Game = require("./src/server/game");
+const Client = require("./src/server/client")
 
 // Use express to open a web server
 var express = require('express');

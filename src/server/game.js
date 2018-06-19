@@ -1,8 +1,8 @@
 'use strict'
 
-const game_core = require("./public/src/game_core");
+const game_core = require("../shared/game_core");
 const logger = require("./logger")
-const Player = require("./public/src/player")
+const Player = require("../shared/player")
 
 module.exports = class Game{
   constructor(name, clients){

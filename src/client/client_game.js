@@ -1,10 +1,10 @@
 //client_game.js
 'use strict';
 
-const game_core = require('./game_core');
-const Sprite = require('./sprite');
-const Player = require('./player');
-const image_container = require('./image_container').getImageContainer();
+const game_core = require('../shared/game_core');
+const Sprite = require('./rendering/sprite');
+const Player = require('../shared/player');
+const image_container = require('./rendering/image_container').getImageContainer();
 
 var interval;
 
