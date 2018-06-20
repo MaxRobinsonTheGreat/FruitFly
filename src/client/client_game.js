@@ -2,22 +2,19 @@
 'use strict';
 
 const game_core = require('../shared/game_core');
-const Sprite = require('./rendering/sprite');
 const Player = require('../shared/player');
-const image_container = require('./rendering/image_container').getImageContainer();
+const Renderer = require('./rendering/renderer');
 
 var interval;
 
 var FPS = 60;
-var mouse_x = 0;
-var mouse_y = 0;
 
 var main_player = new Player();
-main_player.sprite = new Sprite("Alien", main_player.dimensions, 2);
-
 var others = [];
-
 var self_index = -1;
+
+Renderer.setMainPlayer(main_player);
+Renderer.setOthers(others, -1);
 
 var last_update = 0;
 var delta_time = 0;
@@ -27,9 +24,6 @@ var oldest_update;
 var update_delay = 100; //millis
 var correction_counter = 0;
 
-// set to true if you want to see the most recent server's version of the main players box
-var draw_self_debugger = false;
-
 // connects at the ip addess and port of the page
 var socket = io.connect();
 
@@ -37,16 +31,16 @@ socket.on('connect', function(data) {
    main();
 });
 
-function intializeCanvasControls() {
+function intializeControls() {
   document.addEventListener('keydown', checkKeyDown);
 	document.addEventListener('keyup', checkKeyUp);
 }
 
 function main(){
-  intializeCanvasControls();
+  intializeControls();
 
   last_update = Date.now();
-  interval = setInterval(function(){Update();Draw(ctx);}, 1000/FPS);
+  interval = setInterval(function(){Update();Renderer.render();}, 1000/FPS);
 
   //make sure the default position is not colliding with anything
   socket.emit('init_client', main_player.location);
@@ -77,8 +71,6 @@ function updatePlayerPosition() {
 
   var boundry_result = game_core.checkBoundry(main_player.location, main_player.dimensions);
   main_player.location = boundry_result.loc;
-
-  main_player.setOrientation(mouse_x, mouse_y);
 }
 
 function updateOthers(){
@@ -134,11 +126,9 @@ function setState(state){
         location: state.locations[i],
         dimensions: game_core.getDimensionsObj(100, 50),
       });
-
-      var s = new Sprite("Person", others[i].dimensions, .5);
-
-      others[i].sprite = s;
     }
+
+    Renderer.setOthers(others, state.self_index);
   }
   else{
     for(var i in others){
@@ -177,33 +167,6 @@ socket.on('correction', function(pack){
 });
 
 
-
-//      --- DRAW ---
-function Draw(){
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-	drawBox(main_player, "blue");
-  main_player.sprite.drawDirectional(main_player.location.x, main_player.location.y, main_player.orientation);
-
-  for(var i in others){
-    if (i != self_index || draw_self_debugger && i < others.length){
-       drawBox(others[i], "red");
-       others[i].sprite.draw(others[i].location.x, others[i].location.y);
-    }
-  }
-  ctx.beginPath();
-  ctx.moveTo(main_player.center.x, main_player.center.y);
-  ctx.lineTo(mouse_x, mouse_y);
-  ctx.stroke();
-}
-function drawBox(box, color){
-  ctx.fillStyle = color;
-  ctx.fillRect(box.location.x, box.location.y,
-               box.dimensions.w, box.dimensions.h);
-}
-
-
-
 //      --- CONTROL LISTENERS ---
 const KEY_UP=87, KEY_DOWN=83, KEY_LEFT=65, KEY_RIGHT=68;
 function checkKeyDown(evt) {
@@ -229,9 +192,3 @@ function checkKeyUp(evt){
   if (evt.keyCode === KEY_DOWN)
     main_player.commands.down = false;
 }
-
-$("body").mousemove(function(e) {
-  var rect = canvas.getBoundingClientRect();
-  mouse_x = e.clientX - rect.left;
-  mouse_y = e.clientY - rect.top;
-});

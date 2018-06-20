@@ -7,6 +7,11 @@ module.exports = class {
     this.speed = 100; //pixels per second
     this.last_update = Date.now();
     this.orientation = 0;
+    this.sprite_title = "Alien";
+  }
+
+  setSprite(s){
+    this.sprite = s;
   }
 
   getCenter(){

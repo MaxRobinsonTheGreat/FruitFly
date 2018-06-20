@@ -1,11 +1,14 @@
 'use strict'
 
-const image_container = require('./image_container');
+const ImageContainer = require('./image_container');
+
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext("2d");
 
 module.exports = class {
 
 	constructor(title, container, resize_factor){
-		let s = image_container.get(title);
+		let s = ImageContainer.get(title);
 
 		this.container = container;
 
@@ -13,7 +16,6 @@ module.exports = class {
 
 		this.rows = s.rows;
 		this.cols = s.cols;
-		this.ctx = s.ctx;
 		this.wait_time = 1000/s.fps;
 		this.img = s.img;
 
@@ -27,7 +29,7 @@ module.exports = class {
 
 		if(!this.img.complete){
 			console.log("Image \""+title+"\" was NOT loaded in time");
-			image_container.pushOutDated(this);
+			ImageContainer.pushOutDated(this);
 			this.title = title//delete this var when the error has been found
 		}
 		else{
