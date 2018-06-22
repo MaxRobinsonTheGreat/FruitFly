@@ -50,20 +50,16 @@ module.exports = class {
 	imageFinished(){
 		console.log("Image \""+this.title+"\" was loaded after the sprite was instantiated");
 
-		if(!this.frame_width){
-			this.frame_width = this.img.width/this.cols;
-			this.frame_height = this.img.height/this.rows;
-		}
+		this.frame_width = this.img.width/this.cols;
+		this.frame_height = this.img.height/this.rows;
 
 		this.width = this.frame_width;
 		this.height = this.frame_height;
 
-		if(this.resize_factor){
-			this.resizeBy(this.resize_factor);
-		}
-		if(this.container){
-			this.center();
-		}
+		this.resizeBy(this.resize_factor);
+
+		this.center();
+
 		console.log("Image \""+this.title+"\" (w, h):("+this.frame_width+", "+this.frame_height+")");
 	}
 
