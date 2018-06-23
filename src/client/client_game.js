@@ -3,6 +3,8 @@
 
 const game_core = require('../shared/game_core');
 const Player = require('../shared/player');
+const Entity = require('./entity');
+
 const Renderer = require('./rendering/renderer');
 
 var interval;
@@ -76,24 +78,27 @@ function updatePlayerPosition() {
 function updateOthers(){
   if(oldest_update === undefined || update_queue === undefined) return;
 
-
   setState(oldest_update.state);
 
   if(update_queue.length === 0) return;
 
   let current_time = Date.now();
+  let delayed_time = current_time - update_delay - oldest_update.timestamp;
 
   for(var i in others){
     if (i >= update_queue[0].state.locations.length)
       break;
-    if(i != self_index)
-      interpolateEntityAt(i, current_time);
+    if(i != self_index){
+      let startloc = oldest_update.state.locations[i];
+      let endloc = update_queue[0].state.locations[i];
+      let d_time = update_queue[0].timestamp - oldest_update.timestamp;
+      others[i].interpolate(startloc, endloc, d_time, delayed_time);
+    }
     else{
       var index = update_queue[update_queue.length-1].state.self_index;
       others[i].location = update_queue[update_queue.length-1].state.locations[index];
     }
   }
-
 
   while(update_queue.length > 0 && current_time-update_queue[0].timestamp >= update_delay){
     oldest_update = update_queue.shift();
@@ -101,42 +106,40 @@ function updateOthers(){
 }
 
 
-function interpolateEntityAt(i, current_time){
-  let startloc = oldest_update.state.locations[i];
-  let endloc = update_queue[0].state.locations[i];
-  let time_dif = update_queue[0].timestamp - oldest_update.timestamp;
-
-  // we divide by time_dif, so make sure it's not zero
-  if(time_dif === 0) return;
-
-  others[i].location.x += ( ((endloc.x - startloc.x) / (time_dif))*
-                 (current_time - update_delay - oldest_update.timestamp));
-
-  others[i].location.y += ( ((endloc.y - startloc.y) / (time_dif))*
-                (current_time - update_delay - oldest_update.timestamp));
-}
+// function interpolateEntityAt(i, current_time){
+//   let startloc = oldest_update.state.locations[i];
+//   let endloc = update_queue[0].state.locations[i];
+//   let time_dif = update_queue[0].timestamp - oldest_update.timestamp;
+//
+//   // we divide by time_dif, so make sure it's not zero
+//   if(time_dif === 0) return;
+//
+//   others[i].location = startloc;
+//   others[i].location.x += ( ((endloc.x - startloc.x) / (time_dif))*
+//                  (current_time - update_delay - oldest_update.timestamp));
+//
+//   others[i].location.y += ( ((endloc.y - startloc.y) / (time_dif))*
+//                 (current_time - update_delay - oldest_update.timestamp));
+// }
 
 function setState(state){
-  if(others.length !== state.locations.length){
-    others = []; //clear others[]
-
-    for(var i in state.locations){
-
-      others.push({
-        location: state.locations[i],
-        dimensions: game_core.getDimensionsObj(100, 50),
-      });
-    }
-
-    Renderer.setOthers(others, state.self_index);
+  //removes excess others
+  if(others.length > state.locations.length){
+    others.splice(state.locations.length-1, others.length-1);
   }
-  else{
-    for(var i in others){
-      others[i].location = state.locations[i];
+  //adds extra others
+  else if(others.length < state.locations.length){
+    for(var i=others.length; i<state.locations.length; i++){
+      others.push(new Entity(
+        "Person",
+         state.locations[i],
+         game_core.getDimensionsObj(100, 50))
+       );
     }
   }
 
   self_index = state.self_index;
+  Renderer.setSelfIndex(state.self_index);
 }
 
 

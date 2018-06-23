@@ -29,6 +29,10 @@ var renderer = module.exports = {
     this.self_index = self_index;
   },
 
+  setSelfIndex(i){
+    this.self_index = i;
+  },
+
   getCanvasContext: function(){
     return ctx;
   },

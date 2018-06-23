@@ -28,12 +28,9 @@ module.exports = class {
 		this.off_set_y = 0;
 
 		if(!this.img.complete){
-			console.log("Image \""+title+"\" was NOT loaded in time");
 			ImageContainer.pushOutDated(this);
-			this.title = title//delete this var when the error has been found
 		}
 		else{
-			console.log("Image \""+title+"\" was loaded in time");
 			this.frame_width = this.img.width/this.cols;
 			this.frame_height = this.img.height/this.rows;
 
@@ -43,12 +40,10 @@ module.exports = class {
 				this.resizeBy(this.resize_factor);
 			}
 			this.center();
-			console.log("Image \""+title+"\" (w, h):("+this.frame_width+", "+this.frame_height+")");
 		}
 	}
 
 	imageFinished(){
-		console.log("Image \""+this.title+"\" was loaded after the sprite was instantiated");
 
 		this.frame_width = this.img.width/this.cols;
 		this.frame_height = this.img.height/this.rows;
@@ -59,8 +54,6 @@ module.exports = class {
 		this.resizeBy(this.resize_factor);
 
 		this.center();
-
-		console.log("Image \""+this.title+"\" (w, h):("+this.frame_width+", "+this.frame_height+")");
 	}
 
 
